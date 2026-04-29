@@ -1,0 +1,30 @@
+{
+  "buildHash": "f1f1dde009178fee0b3bbc1381a901ad",
+  "jsApi": {
+    "apiInstances": [],
+    "apiAliases": {},
+    "apiInterfaces": {},
+    "apiNames": {
+      "linkMadFilesToDomainWithPath": "String -> String -> String -> #[String, String]",
+      "replaceMadlibFileByPattern": "String -> String -> String",
+      "linkMadFilesToGithub": "String -> String -> #[String, String]",
+      "hasSlash": "String -> Boolean",
+      "hasMadlibFile": "String -> Boolean"
+    },
+    "apiTypes": {}
+  },
+  "llvmApi": {
+    "apiInstances": [],
+    "apiAliases": {},
+    "apiInterfaces": {},
+    "apiNames": {
+      "linkMadFilesToDomainWithPath": "String -> String -> String -> #[String, String]",
+      "replaceMadlibFileByPattern": "String -> String -> String",
+      "linkMadFilesToGithub": "String -> String -> #[String, String]",
+      "hasSlash": "String -> Boolean",
+      "hasMadlibFile": "String -> Boolean"
+    },
+    "apiTypes": {}
+  },
+  "versionHash": "25e64aa754c310d45c1e084d574c1bb0"
+}
