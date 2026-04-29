@@ -1,7 +1,7 @@
 # ¶ pilcrow
 
 [![Madlib Project Badge](https://img.shields.io/badge/madlib-purple?logo=github&logoSize=auto)](//github.com/madlib-lang/madlib)
-[![pilcrow v0.0.1](https://img.shields.io/badge/v0.0.1-purple?label=version)](//github.com/brekk/spirit-gum)
+[![pilcrow v0.0.1](https://img.shields.io/badge/v0.0.1-purple?label=version)](//github.com/brekk/pilcrow)
 
 ---
 
