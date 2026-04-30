@@ -19,6 +19,7 @@ import VFile from "spirit-gum/VFile"
 INITIAL_STATE = { files: [] }
 CONSTANTS = {
   ESCAPE_MADLIB: "\\$__MADLIB__",
+  ESCAPE_ESC_MADLIB: "\\$____MADLIB____",
   MADLIB_BADGE: "\\$MADLIB\\.projectBadge",
   VERSION: "\\$MADLIB\\.json\\.version",
   DEPENDENCIES: "\\$MADLIB\\.json\\.dependencies",
@@ -105,6 +106,16 @@ depMatch = (d) => {
 }
 
 rules = {
+  antiAntiMagic: Rule.lineRule(
+    false,
+    "pilcrow/markdown/anti-anti-magic",
+    [],
+    [
+      LTransformer.ofLine(
+        (_, _, x) => String.replace(CONSTANTS.ESCAPE_ESC_MADLIB, "$__MADLIB__", x),
+      ),
+    ],
+  ),
   antiMagic: Rule.lineRule(
     false,
     "pilcrow/markdown/anti-magic",
@@ -171,6 +182,7 @@ applySpiritGumWithRules = (json, src) => pipe(
       rules.files,
       rules.magicDependencies(json),
       rules.antiMagic,
+      rules.antiAntiMagic,
     ],
   ),
   VFile.forceVFileError,
