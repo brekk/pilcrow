@@ -60,7 +60,7 @@ This rule requires a valid `madlib.json` be in the current path. Future versions
 
 This rule is not yet *idempotent*. It will generate multi-line content and remove the marker.
 
-This rule requires a valid `madlib.json` be in the current path. Future versions will allow for this to be a configurable path.
+This rule requires a valid `madlib.json` be in the current path. Future versions will allow for this to be a configurable path
 
 **Generated content**:
 <!-- $MADLIB.json.dependencies -->
@@ -68,4 +68,3 @@ This rule requires a valid `madlib.json` be in the current path. Future versions
 ###### 👿 Interpolation Hell
 
 This file is automatically created from [this source](https://github.com/brekk/pilcrow/blob/main/README.raw.md?plain=1), which makes use of a magic constant `$____MADLIB____` in order to render correctly. Don't use that, use `$__MADLIB__` in your markdown files.
-
