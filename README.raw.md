@@ -3,7 +3,6 @@
 <!-- $MADLIB.projectBadge -->
 <!-- $MADLIB.json.version -->
 
----
 
 badges and `spirit-gum` rules for readmes!
 
@@ -21,7 +20,7 @@ To use, put a magic `$__MADLIB__` in an markdown file, wrapped in an HTML commen
 
 ## Rules
 
-### Badge
+### 📛 Badge
 
 ```md
 <!-- $__MADLIB__.projectBadge -->
@@ -36,7 +35,7 @@ This rule is *idempotent*. It will overwrite the existing line but can be run re
 
 ---
 
-### Project Version
+### 📐 Project Version
 
 ```md
 <!-- $__MADLIB__.json.version -->
@@ -53,7 +52,7 @@ This rule requires a valid `madlib.json` be in the current path. Future versions
 
 ---
 
-### Dependencies
+### 🔗 Dependencies
 
 ```md
 <!-- $__MADLIB__.json.dependencies -->
@@ -66,7 +65,7 @@ This rule requires a valid `madlib.json` be in the current path. Future versions
 **Generated content**:
 <!-- $MADLIB.json.dependencies -->
 
-###### Interpolation Hell
+###### 👿 Interpolation Hell
 
 This file is automatically created from [this source](https://github.com/brekk/pilcrow/blob/main/README.raw.md?plain=1), which makes use of a magic constant `$____MADLIB____` in order to render correctly. Don't use that, use `$__MADLIB__` in your markdown files.
 

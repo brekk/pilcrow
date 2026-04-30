@@ -69,7 +69,7 @@ This rule requires a valid `madlib.json` be in the current path. Future versions
  - [PartyBus](//github.com/brekk/party-bus)
  - [spirit-gum](//github.com/brekk/spirit-gum) 
 
-###### Meta
+###### Interpolation Hell
 
-This file is automatically created from [this source](https://github.com/brekk/pilcrow/blob/main/README.raw.md?plain=1), which makes use of a magic constant `$__MADLIB__` in order to render correctly. Don't use that unless you need to explain the utility of this library. 
+This file is automatically created from [this source](https://github.com/brekk/pilcrow/blob/main/README.raw.md?plain=1), which makes use of a magic constant `$__MADLIB__` in order to render correctly. Don't use that, use `$MADLIB` in your markdown files.
 

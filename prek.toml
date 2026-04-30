@@ -17,3 +17,15 @@ hooks = [
     files = "\\.mad$"
   }
 ]
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id ="pilcrow",
+    name="pilcrow",
+    # entry="bash -c 'for x in \"$@\"; do pilcrow -i \"$x\" --fix; done' --",
+    entry="pilcrow",
+    language="system",
+    files = "\\.raw.md$"
+  }
+]
