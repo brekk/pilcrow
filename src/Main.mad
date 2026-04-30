@@ -26,7 +26,7 @@ CONSTANTS = {
   NON_WORD_AND_SPACES: "[\\W\\s]",
   HEADING: "^(#*)\\s*(.*)",
   HTML_COMMENT: "<!-- .* -->",
-  HTML_CAPTURING_COMMENT: "(.*) <!-- (.*) -->",
+  HTML_CAPTURING_COMMENT: ".* <!-- (.*) -->",
 }
 
 
@@ -61,9 +61,14 @@ MADLIB_PROJECT = "[![Madlib Project Badge](https://img.shields.io/badge/madlib-p
 lineMatchTransformer = (toMatch, replacer) => LTransformer.ofLineRaw(
   (meta, index, line) => {
     hasBadge = String.match(toMatch, line)
-    ref = String.replace(CONSTANTS.HTML_CAPTURING_COMMENT, "$2", line)
-    ref2 = ref == "<!-- $MADLIB.json.dependencies -->" ? "" : ref
-    return #[meta, hasBadge ? replacer(meta, index, stripHTMLComment(line)) ++ " " ++ ref2 : line]
+    return #[
+      meta,
+      hasBadge
+        ? replacer(meta, index, stripHTMLComment(line))
+          ++ " "
+          ++ String.replace(CONSTANTS.HTML_CAPTURING_COMMENT, "$2", line)
+        : line,
+    ]
   },
 )
 madlibJson = pipe(
