@@ -25,6 +25,8 @@ CONSTANTS = {
   MADLIB_FILE: "\\b([\\w\\/\\.]*)\\.mad",
   NON_WORD_AND_SPACES: "[\\W\\s]",
   HEADING: "^(#*)\\s*(.*)",
+  HTML_COMMENT: "<!-- .* -->",
+  HTML_CAPTURING_COMMENT: ".* <!-- (.*) -->",
 }
 
 
@@ -48,6 +50,8 @@ export linkMadFilesToDomainWithPath = (domain, path, str) => Fn.ifElse(
   Fn.always(#["", str]),
 )(str)
 
+stripHTMLComment = String.replace(CONSTANTS.HTML_COMMENT, "")
+
 
 export linkMadFilesToGithub = linkMadFilesToDomainWithPath("//github.com")
 linkMadFiles = linkMadFilesToGithub("/brekk/pilcrow/blob/main")
@@ -57,7 +61,16 @@ MADLIB_PROJECT = "[![Madlib Project Badge](https://img.shields.io/badge/madlib-p
 lineMatchTransformer = (toMatch, replacer) => LTransformer.ofLineRaw(
   (meta, index, line) => {
     hasBadge = String.match(toMatch, line)
-    return #[meta, hasBadge ? replacer(meta, index, line) : line]
+    return #[
+      meta,
+      hasBadge
+        ? replacer(meta, index, stripHTMLComment(line))
+          ++ " "
+          ++ "<!-- "
+          ++ String.replace(CONSTANTS.HTML_CAPTURING_COMMENT, "$1", line)
+          ++ " -->"
+        : line,
+    ]
   },
 )
 madlibJson = pipe(
@@ -76,6 +89,27 @@ madlibVersionWithLink = (link, { version, name }) => {
   return `[![${name} v${vvv}](https://img.shields.io/badge/v${vvv}-purple?label=version)](${link})`
 }
 madlibVersion = madlibVersionWithLink("//github.com/brekk/pilcrow")
+
+depMatch = (d) => {
+  link = pipe(
+    .url,
+    String.split("/"),
+    List.reject(String.isEmpty),
+    List.slice(2, -4),
+    String.join("/"),
+  )(d)
+  name = pipe(
+    .name,
+    fromMaybe(""),
+  )(d)
+  desc = pipe(
+    .description,
+    fromMaybe(""),
+  )(d)
+  ref = String.isEmpty(name) ? desc : name
+
+  return ` - [${ref}](//github.com/${link})`
+}
 
 rules = {
   antiMagic: Rule.lineRule(
@@ -106,27 +140,7 @@ rules = {
         (_, _, _) => pipe(
           .dependencies,
           fromMaybe([]),
-          map(
-            (d) => {
-              link = pipe(
-                String.split("/"),
-                List.reject(String.isEmpty),
-                List.slice(2, -4),
-                String.join("/"),
-              )(d.url)
-              name = pipe(
-                .name,
-                fromMaybe(""),
-              )(d)
-              desc = pipe(
-                .description,
-                fromMaybe(""),
-              )(d)
-              ref = String.isEmpty(name) ? desc : name
-
-              return ` - [${ref}](//github.com/${link})`
-            },
-          ),
+          map(depMatch),
           String.unlines,
         )(json),
       ),
@@ -151,7 +165,7 @@ write = (path, x) => chain(
   pipe(
     File.write(path),
     VFile.forceVFileError,
-    map(Fn.always(`Wrote to ${path}`)),
+    map(Fn.always(path)),
   ),
 )(x)
 
@@ -175,13 +189,20 @@ applySpiritGumWithRules = (json, src) => pipe(
   write(src),
 )(INITIAL_STATE)
 
+PILCROW = IO.green("¶")
 
-fillfull = (badMsg, goodMsg, wish) => Wish.fulfill(
+fillfull = (badMsg, wish) => Wish.fulfill(
   (bad) => {
     IO.pTrace(badMsg, bad)
   },
   (good) => {
-    IO.pTrace(goodMsg, good)
+    hasFiles = !List.isEmpty(good)
+    return if (hasFiles) do {
+      IO.putLine(PILCROW ++ " " ++ String.join(" " ++ PILCROW ++ " ", good))
+      IO.putLine("\tProcessed: " ++ show(List.length(good)) ++ " files")
+    } else {
+      IO.putLine("No files to process")
+    }
   },
   wish,
 )
@@ -196,6 +217,6 @@ main = (args) => {
         Wish.parallel,
       )(args),
     ),
-    fillfull("Barf!", "Yay!"),
+    fillfull("Error:"),
   )(madlibJson)
 }

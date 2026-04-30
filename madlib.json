@@ -1,7 +1,8 @@
 {
   "name": "pilcrow",
   "version": "0.0.1",
-  "main": "src/Main.mad",
+  "main": "src/Pilcrow.mad",
+  "bin": "src/Pilcrow.mad",
   "importAliases": {
     ".": "src"
   },
@@ -17,8 +18,8 @@
       "description": "Study"
     },
     {
-      "minVersion": "0.0.7",
-      "url": "https://github.com/brekk/party-bus/archive/refs/tags/v0.0.7.zip",
+      "minVersion": "0.0.8",
+      "url": "https://github.com/brekk/party-bus/archive/refs/tags/v0.0.8.zip",
       "description": "PartyBus"
     },
     {
