@@ -1,3 +1,4 @@
+import Fn from "Function"
 import IO from "IO"
 import List from "List"
 import String from "String"
@@ -12,18 +13,27 @@ import { rulesFromJson } from "@/Rules"
 
 PILCROW = IO.green("¶")
 
+renderGoodPath = Fn.ifElse(
+  List.isEmpty,
+  (_) => "No files to process",
+  (processed) => PILCROW
+      ++ " "
+      ++ String.join(" " ++ PILCROW ++ " ", processed)
+      ++ "\n\tProcessed: "
+      ++ show(List.length(processed))
+      ++ " files",
+)
+
+
 fillfull = (badMsg, wish) => Wish.fulfill(
   (bad) => {
     IO.pTrace(badMsg, bad)
   },
-  (good) => {
-    hasFiles = !List.isEmpty(good)
-    return if (hasFiles) do {
-      IO.putLine(PILCROW ++ " " ++ String.join(" " ++ PILCROW ++ " ", good))
-      IO.putLine("\tProcessed: " ++ show(List.length(good)) ++ " files")
-    } else {
-      IO.putLine("No files to process")
-    }
+  (g) => {
+    pipe(
+      renderGoodPath,
+      IO.putLine,
+    )(g)
   },
   wish,
 )

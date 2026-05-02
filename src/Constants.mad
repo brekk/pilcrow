@@ -3,10 +3,10 @@ export CONSTANTS = {
   ESCAPE_ESC_MADLIB: "\\$____MADLIB____",
   MADLIB_BADGE: "\\$MADLIB\\.projectBadge",
   VERSION: "\\$MADLIB\\.json\\.version",
-  DEPENDENCIES: "\\$MADLIB\\.json\\.dependencies",
+  DEPENDENCIES: "\\$MADLIB\\.dependencies",
   MADLIB_FILE: "\\b([\\w\\/\\.]*)\\.mad",
   NON_WORD_AND_SPACES: "[\\W\\s]",
   HEADING: "^(#*)\\s*(.*)",
   HTML_COMMENT: "<!-- .* -->",
-  HTML_CAPTURING_COMMENT: "(.*) <!-- (.*) -->",
+  HTML_CAPTURING_COMMENT: "(.*)\\s?\\<!-- (.*) --\\>",
 }

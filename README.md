@@ -15,7 +15,7 @@ To use, put a magic `$MADLIB` in an markdown file, wrapped in an HTML comment, s
 ```md
 <!-- $MADLIB.projectBadge -->
 <!-- $MADLIB.json.version -->
-<!-- $MADLIB.json.dependencies -->
+<!-- $MADLIB.dependencies -->
 ```
 
 ## Rules
@@ -55,7 +55,7 @@ This rule requires a valid `madlib.json` be in the current path. Future versions
 ### 🔗 Dependencies
 
 ```md
-<!-- $MADLIB.json.dependencies -->
+<!-- $MADLIB.dependencies -->
 ```
 
 This rule is not yet *idempotent*. It will generate multi-line content and remove the marker.
@@ -63,11 +63,8 @@ This rule is not yet *idempotent*. It will generate multi-line content and remov
 This rule requires a valid `madlib.json` be in the current path. Future versions will allow for this to be a configurable path
 
 **Generated content**:
- - [mad-at-json](//github.com/brekk/study)
- - [Study](//github.com/brekk/study)
- - [PartyBus](//github.com/brekk/party-bus)
- - [spirit-gum](//github.com/brekk/spirit-gum) 
+<!-- $MADLIB.dependencies -->
 
 ###### 👿 Interpolation Hell
 
-This file is automatically created from [this source](https://github.com/brekk/pilcrow/blob/main/README.raw.md?plain=1), which makes use of a magic constant `$__MADLIB__` in order to render correctly. Don't use that, use `$MADLIB` in your markdown files.
+This file is automatically created from [this source](https://github.com/brekk/pilcrow/blob/main/README.raw.md?plain=1), which makes use of a magic constant `$____MADLIB____` in order to render correctly. Don't use that, use `$MADLIB` in your markdown files.

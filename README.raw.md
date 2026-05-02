@@ -15,7 +15,7 @@ To use, put a magic `$__MADLIB__` in an markdown file, wrapped in an HTML commen
 ```md
 <!-- $__MADLIB__.projectBadge -->
 <!-- $__MADLIB__.json.version -->
-<!-- $__MADLIB__.json.dependencies -->
+<!-- $__MADLIB__.dependencies -->
 ```
 
 ## Rules
@@ -55,7 +55,7 @@ This rule requires a valid `madlib.json` be in the current path. Future versions
 ### 🔗 Dependencies
 
 ```md
-<!-- $__MADLIB__.json.dependencies -->
+<!-- $__MADLIB__.dependencies -->
 ```
 
 This rule is not yet *idempotent*. It will generate multi-line content and remove the marker.
@@ -63,7 +63,7 @@ This rule is not yet *idempotent*. It will generate multi-line content and remov
 This rule requires a valid `madlib.json` be in the current path. Future versions will allow for this to be a configurable path
 
 **Generated content**:
-<!-- $MADLIB.json.dependencies -->
+<!-- $MADLIB.dependencies -->
 
 ###### 👿 Interpolation Hell
 

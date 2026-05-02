@@ -14,7 +14,7 @@ Study.report(
   },
   "lineMatchTransformer",
   [
-    #["hello", #[{}, "hellohello hello"]],
+    #["hello", #[{}, "hellohello <!-- hello -->"]],
     #["nono", #[{}, "nono"]],
     #["<!-- $MADLIB.dependencies -->", #[{}, "<!-- $MADLIB.dependencies -->"]],
   ],
