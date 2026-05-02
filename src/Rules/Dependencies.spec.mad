@@ -18,6 +18,14 @@ import { depMatch, generateDeps, id, lineTransformer, rule } from "@/Rules/Depen
 
 
 
+EXPECTED = (
+  ` - [ensign](//github.com/brekk/ensign)
+ - [mad-at-json](//github.com/brekk/mad-at-json)
+ - [Study](//github.com/brekk/study)
+ - [PartyBus](//github.com/brekk/party-bus)
+ - [spirit-gum](//github.com/brekk/spirit-gum)`
+)
+
 Study.asyncReport(
   pipe(
     map(
@@ -41,16 +49,8 @@ Study.asyncReport(
     map(generateDeps),
     Wish.mapRej((_) => Error("Barf")),
   ),
-  ID ++ " - generates",
-  [
-    #[
-      madlibJson,
-      ` - [mad-at-json](//github.com/brekk/study)
- - [Study](//github.com/brekk/study)
- - [PartyBus](//github.com/brekk/party-bus)
- - [spirit-gum](//github.com/brekk/spirit-gum)`,
-    ],
-  ],
+  ID ++ " - generates dependencies",
+  [#[madlibJson, EXPECTED]],
 )
 
 
@@ -78,14 +78,6 @@ Study.asyncReport(
     map(lineTransformer($, {}, 1, "<!-- $MADLIB.dependencies -->")),
     Wish.mapRej((_) => Error("Barf")),
   ),
-  ID ++ " - generates corretly",
-  [
-    #[
-      madlibJson,
-      ` - [mad-at-json](//github.com/brekk/study)
- - [Study](//github.com/brekk/study)
- - [PartyBus](//github.com/brekk/party-bus)
- - [spirit-gum](//github.com/brekk/spirit-gum)`,
-    ],
-  ],
+  ID ++ " - generates correctly",
+  [#[madlibJson, EXPECTED]],
 )

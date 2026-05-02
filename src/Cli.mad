@@ -4,6 +4,8 @@ import List from "List"
 import String from "String"
 import Wish from "Wish"
 
+import Ensign from "ensign"
+
 import _List from "@/List"
 import { madlibJson } from "@/MadlibJson"
 import Pilcrow from "@/Pilcrow"
