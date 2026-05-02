@@ -1,0 +1,17 @@
+import AntiAntiMagic from "@/Rules/AntiAntiMagic"
+import AntiMagic from "@/Rules/AntiMagic"
+import Dependencies from "@/Rules/Dependencies"
+import Files from "@/Rules/Files"
+import MagicBadge from "@/Rules/MagicBadge"
+import MagicVersion from "@/Rules/MagicVersion"
+
+
+
+export rulesFromJson = (json) => [
+  MagicBadge.rule,
+  MagicVersion.rule(json),
+  Files.rule(json.name),
+  Dependencies.rule(json),
+  AntiMagic.rule,
+  AntiAntiMagic.rule,
+]

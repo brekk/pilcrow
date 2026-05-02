@@ -1,0 +1,15 @@
+import String from "String"
+
+import Rule from "spirit-gum/Rule"
+import LTransformer from "spirit-gum/Rule/TransformerLine"
+
+import { CONSTANTS } from "@/Constants"
+
+
+
+export rule = Rule.lineRule(
+  false,
+  "pilcrow/markdown/anti-magic",
+  [],
+  [LTransformer.ofLine((_, _, x) => String.replace(CONSTANTS.ESCAPE_MADLIB, "$MADLIB", x))],
+)

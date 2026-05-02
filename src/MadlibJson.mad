@@ -1,0 +1,17 @@
+import File from "File"
+
+import MadlibJson from "mad-at-json/Parse/MadlibJson"
+import VFile from "spirit-gum/VFile"
+
+
+
+export read = pipe(
+  File.read,
+  VFile.forceVFileError,
+  chain(
+    pipe(
+      MadlibJson.parse,
+      VFile.forceVFileError,
+    ),
+  ),
+)

@@ -1,0 +1,6 @@
+import List from "List"
+
+
+
+chop :: Integer -> List a -> List a
+export chop = (i, xs) => List.slice(i, List.length(xs), xs)

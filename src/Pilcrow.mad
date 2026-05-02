@@ -1,169 +1,15 @@
 import File from "File"
 import Fn from "Function"
-import IO from "IO"
-import List from "List"
-import { fromMaybe } from "Maybe"
 import String from "String"
-import Wish from "Wish"
 
-import MadlibJson from "mad-at-json/Parse/MadlibJson"
-import Version from "mad-at-json/Version"
 import Line from "spirit-gum/Line"
-import Rule from "spirit-gum/Rule"
-import LTransformer from "spirit-gum/Rule/TransformerLine"
 import Template from "spirit-gum/Template"
 import VFile from "spirit-gum/VFile"
 
 
 
 INITIAL_STATE = { files: [] }
-CONSTANTS = {
-  ESCAPE_MADLIB: "\\$__MADLIB__",
-  ESCAPE_ESC_MADLIB: "\\$____MADLIB____",
-  MADLIB_BADGE: "\\$MADLIB\\.projectBadge",
-  VERSION: "\\$MADLIB\\.json\\.version",
-  DEPENDENCIES: "\\$MADLIB\\.json\\.dependencies",
-  MADLIB_FILE: "\\b([\\w\\/\\.]*)\\.mad",
-  NON_WORD_AND_SPACES: "[\\W\\s]",
-  HEADING: "^(#*)\\s*(.*)",
-  HTML_COMMENT: "<!-- .* -->",
-  HTML_CAPTURING_COMMENT: "(.*) <!-- (.*) -->",
-}
 
-
-export hasMadlibFile = String.match(CONSTANTS.MADLIB_FILE)
-export replaceMadlibFileByPattern = String.replace(CONSTANTS.MADLIB_FILE)
-export hasSlash = String.contains("/")
-
-export linkMadFilesToDomainWithPath = (domain, path, str) => Fn.ifElse(
-  hasMadlibFile,
-  Fn.ifElse(
-    hasSlash,
-    (x) => #[
-      replaceMadlibFileByPattern("$1", x),
-      replaceMadlibFileByPattern("[$1.mad](" ++ domain ++ path ++ "/$1.mad)", x),
-    ],
-    (x) => #[
-      replaceMadlibFileByPattern("$1", x),
-      replaceMadlibFileByPattern("[$1.mad](" ++ domain ++ path ++ "/src/$1.mad)", x),
-    ],
-  ),
-  Fn.always(#["", str]),
-)(str)
-
-stripHTMLComment = String.replace(CONSTANTS.HTML_COMMENT, "")
-
-
-export linkMadFilesToGithub = linkMadFilesToDomainWithPath("//github.com")
-linkMadFiles = linkMadFilesToGithub("/brekk/pilcrow/blob/main")
-
-MADLIB_PROJECT = "[![Madlib Project Badge](https://img.shields.io/badge/madlib-purple?logo=github&logoSize=auto)](//github.com/madlib-lang/madlib)"
-
-lineMatchTransformer = (toMatch, replacer) => LTransformer.ofLineRaw(
-  (meta, index, line) => {
-    hasBadge = String.match(toMatch, line)
-    ref = String.replace(CONSTANTS.HTML_CAPTURING_COMMENT, "$2", line)
-    ref2 = ref == "<!-- $MADLIB.json.dependencies -->" ? "" : ref
-    return #[meta, hasBadge ? replacer(meta, index, stripHTMLComment(line)) ++ " " ++ ref2 : line]
-  },
-)
-madlibJson = pipe(
-  File.read,
-  VFile.forceVFileError,
-  chain(
-    pipe(
-      MadlibJson.parse,
-      VFile.forceVFileError,
-    ),
-  ),
-)("./madlib.json")
-
-madlibVersionWithLink = (link, { version, name }) => {
-  vvv = Version.showVersion(version)
-  return `[![${name} v${vvv}](https://img.shields.io/badge/v${vvv}-purple?label=version)](${link})`
-}
-madlibVersion = madlibVersionWithLink("//github.com/brekk/pilcrow")
-
-depMatch = (d) => {
-  link = pipe(
-    .url,
-    String.split("/"),
-    List.reject(String.isEmpty),
-    List.slice(2, -4),
-    String.join("/"),
-  )(d)
-  name = pipe(
-    .name,
-    fromMaybe(""),
-  )(d)
-  desc = pipe(
-    .description,
-    fromMaybe(""),
-  )(d)
-  ref = String.isEmpty(name) ? desc : name
-
-  return ` - [${ref}](//github.com/${link})`
-}
-
-rules = {
-  antiAntiMagic: Rule.lineRule(
-    false,
-    "pilcrow/markdown/anti-anti-magic",
-    [],
-    [
-      LTransformer.ofLine(
-        (_, _, x) => String.replace(CONSTANTS.ESCAPE_ESC_MADLIB, "$__MADLIB__", x),
-      ),
-    ],
-  ),
-  antiMagic: Rule.lineRule(
-    false,
-    "pilcrow/markdown/anti-magic",
-    [],
-    [LTransformer.ofLine((_, _, x) => String.replace(CONSTANTS.ESCAPE_MADLIB, "$MADLIB", x))],
-  ),
-  magicBadge: Rule.lineRule(
-    false,
-    "pilcrow/markdown/magic-madlib-badge",
-    [],
-    [lineMatchTransformer(CONSTANTS.MADLIB_BADGE, (_, _, _) => MADLIB_PROJECT)],
-  ),
-  magicVersion: (json) => Rule.lineRule(
-    false,
-    "pilcrow/markdown/madlib-version",
-    [],
-    [lineMatchTransformer(CONSTANTS.VERSION, (_, _, _) => madlibVersion(json))],
-  ),
-  magicDependencies: (json) => Rule.lineRule(
-    false,
-    "pilcrow/markdown/magic-dependencies",
-    [],
-    [
-      lineMatchTransformer(
-        CONSTANTS.DEPENDENCIES,
-        (_, _, _) => pipe(
-          .dependencies,
-          fromMaybe([]),
-          map(depMatch),
-          String.unlines,
-        )(json),
-      ),
-    ],
-  ),
-  files: Rule.lineRule(
-    false,
-    "pilcrow/markdown/madlib-files",
-    [],
-    [
-      LTransformer.ofLineRaw(
-        (state, _, line) => {
-          #[x, link] = linkMadFiles(line)
-          return #[{ ...state, files: [...state.files, x] }, link]
-        },
-      ),
-    ],
-  ),
-}
 
 write = (path, x) => chain(
   pipe(
@@ -173,55 +19,9 @@ write = (path, x) => chain(
   ),
 )(x)
 
-applySpiritGumWithRules = (json, src) => pipe(
-  VFile.fromPath(
-    src,
-    [
-      rules.magicBadge,
-      rules.magicVersion(json),
-      rules.files,
-      rules.magicDependencies(json),
-      rules.antiMagic,
-      rules.antiAntiMagic,
-    ],
-  ),
+export runner = (json, rulesFn, src) => pipe(
+  VFile.fromPath(src, rulesFn(json)),
   VFile.forceVFileError,
-  map(
-    pipe(
-      Template.renderWithConverter(map(Line.render), (_, lines, _) => String.unlines(lines)),
-    ),
-  ),
+  map(Template.renderWithConverter(map(Line.render), (_, l, _) => String.unlines(l))),
   write(src),
 )(INITIAL_STATE)
-
-PILCROW = IO.green("¶")
-
-fillfull = (badMsg, wish) => Wish.fulfill(
-  (bad) => {
-    IO.pTrace(badMsg, bad)
-  },
-  (good) => {
-    hasFiles = !List.isEmpty(good)
-    return if (hasFiles) do {
-      IO.putLine(PILCROW ++ " " ++ String.join(" " ++ PILCROW ++ " ", good))
-      IO.putLine("\tProcessed: " ++ show(List.length(good)) ++ " files")
-    } else {
-      IO.putLine("No files to process")
-    }
-  },
-  wish,
-)
-chop = (i, xs) => List.slice(i, List.length(xs), xs)
-
-main = (args) => {
-  pipe(
-    chain(
-      (json) => pipe(
-        chop(1),
-        map(applySpiritGumWithRules(json)),
-        Wish.parallel,
-      )(args),
-    ),
-    fillfull("Error:"),
-  )(madlibJson)
-}

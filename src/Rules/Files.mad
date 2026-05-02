@@ -1,0 +1,50 @@
+import Fn from "Function"
+import String from "String"
+
+import Rule from "spirit-gum/Rule"
+import LTransformer from "spirit-gum/Rule/TransformerLine"
+
+import { CONSTANTS } from "@/Constants"
+
+
+
+export hasMadlibFile = String.match(CONSTANTS.MADLIB_FILE)
+export replaceMadlibFileByPattern = String.replace(CONSTANTS.MADLIB_FILE)
+export hasSlash = String.contains("/")
+
+export linkMadFilesToDomainWithPath = (domain, path, str) => Fn.ifElse(
+  hasMadlibFile,
+  Fn.ifElse(
+    hasSlash,
+    (x) => #[
+      replaceMadlibFileByPattern("$1", x),
+      replaceMadlibFileByPattern("[$1.mad](" ++ domain ++ path ++ "/$1.mad)", x),
+    ],
+    (x) => #[
+      replaceMadlibFileByPattern("$1", x),
+      replaceMadlibFileByPattern("[$1.mad](" ++ domain ++ path ++ "/src/$1.mad)", x),
+    ],
+  ),
+  Fn.always(#["", str]),
+)(str)
+
+
+
+export linkMadFilesToGithub = linkMadFilesToDomainWithPath("//github.com")
+
+
+export ruleWithDomainPath = (domain, path, repo) => Rule.lineRule(
+  false,
+  "pilcrow/markdown/madlib-files",
+  [],
+  [
+    LTransformer.ofLineRaw(
+      (state, _, line) => {
+        #[x, link] = linkMadFilesToDomainWithPath(domain, repo ++ path, line)
+        return #[{ ...state, files: [...state.files, x] }, link]
+      },
+    ),
+  ],
+)
+
+export rule = ruleWithDomainPath("//github.com", "/blob/main")

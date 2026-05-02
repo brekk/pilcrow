@@ -1,0 +1,31 @@
+import IO from "IO"
+import List from "List"
+import { fromMaybe } from "Maybe"
+import String from "String"
+import Wish from "Wish"
+
+import Version from "mad-at-json/Version"
+import Line from "spirit-gum/Line"
+import Rule from "spirit-gum/Rule"
+import LTransformer from "spirit-gum/Rule/TransformerLine"
+import Template from "spirit-gum/Template"
+import VFile from "spirit-gum/VFile"
+
+import { CONSTANTS } from "@/Constants"
+import MadlibJson from "@/MadlibJson"
+import { lineMatchTransformer } from "@/Transformer"
+
+
+
+madlibVersionWithLink = (link, { version, name }) => {
+  vvv = Version.showVersion(version)
+  return `[![${name} v${vvv}](https://img.shields.io/badge/v${vvv}-purple?label=version)](${link})`
+}
+madlibVersion = madlibVersionWithLink("//github.com/brekk/pilcrow")
+
+export rule = (json) => Rule.lineRule(
+  false,
+  "pilcrow/markdown/madlib-version",
+  [],
+  [lineMatchTransformer(CONSTANTS.VERSION, (_, _, _) => madlibVersion(json))],
+)

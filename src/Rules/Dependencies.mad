@@ -1,0 +1,48 @@
+import List from "List"
+import { fromMaybe } from "Maybe"
+import String from "String"
+
+import Rule from "spirit-gum/Rule"
+
+import { CONSTANTS } from "@/Constants"
+import { lineMatchTransformer } from "@/Transformer"
+
+
+
+export depMatch = (d) => {
+  link = pipe(
+    .url,
+    String.split("/"),
+    List.reject(String.isEmpty),
+    List.slice(2, -4),
+    String.join("/"),
+  )(d)
+  name = pipe(
+    .name,
+    fromMaybe(""),
+  )(d)
+  desc = pipe(
+    .description,
+    fromMaybe(""),
+  )(d)
+  ref = String.isEmpty(name) ? desc : name
+
+  return ` - [${ref}](//github.com/${link})`
+}
+
+export rule = (json) => Rule.lineRule(
+  false,
+  "pilcrow/markdown/magic-dependencies",
+  [],
+  [
+    lineMatchTransformer(
+      CONSTANTS.DEPENDENCIES,
+      (_, _, _) => pipe(
+        .dependencies,
+        fromMaybe([]),
+        map(depMatch),
+        String.unlines,
+      )(json),
+    ),
+  ],
+)

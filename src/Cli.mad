@@ -1,0 +1,50 @@
+import File from "File"
+import Fn from "Function"
+import IO from "IO"
+import List from "List"
+import String from "String"
+import Wish from "Wish"
+
+import Line from "spirit-gum/Line"
+import Template from "spirit-gum/Template"
+import VFile from "spirit-gum/VFile"
+
+import _List from "@/List"
+import MadlibJson from "@/MadlibJson"
+import Pilcrow from "@/Pilcrow"
+import { rulesFromJson } from "@/Rules"
+
+
+
+madlibJson = MadlibJson.read("./madlib.json")
+
+PILCROW = IO.green("¶")
+
+fillfull = (badMsg, wish) => Wish.fulfill(
+  (bad) => {
+    IO.pTrace(badMsg, bad)
+  },
+  (good) => {
+    hasFiles = !List.isEmpty(good)
+    return if (hasFiles) do {
+      IO.putLine(PILCROW ++ " " ++ String.join(" " ++ PILCROW ++ " ", good))
+      IO.putLine("\tProcessed: " ++ show(List.length(good)) ++ " files")
+    } else {
+      IO.putLine("No files to process")
+    }
+  },
+  wish,
+)
+
+main = (args) => {
+  pipe(
+    chain(
+      (json) => pipe(
+        _List.chop(1),
+        map(Pilcrow.runner(json, rulesFromJson)),
+        Wish.parallel,
+      )(args),
+    ),
+    fillfull("Error:"),
+  )(madlibJson)
+}

@@ -1,0 +1,15 @@
+import Rule from "spirit-gum/Rule"
+
+import { CONSTANTS } from "@/Constants"
+import { lineMatchTransformer } from "@/Transformer"
+
+
+
+MADLIB_PROJECT = "[![Madlib Project Badge](https://img.shields.io/badge/madlib-purple?logo=github&logoSize=auto)](//github.com/madlib-lang/madlib)"
+
+export rule = Rule.lineRule(
+  false,
+  "pilcrow/markdown/magic-madlib-badge",
+  [],
+  [lineMatchTransformer(CONSTANTS.MADLIB_BADGE, (_, _, _) => MADLIB_PROJECT)],
+)
