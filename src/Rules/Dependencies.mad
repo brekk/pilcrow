@@ -1,3 +1,8 @@
+import type { Dependency } from "mad-at-json/Parse/Dependency"
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
+import type { Rule } from "spirit-gum/Rule"
+import type { LineTransformerFunction } from "spirit-gum/Rule/TransformerLine"
+
 import List from "List"
 import { fromMaybe } from "Maybe"
 import String from "String"
@@ -9,6 +14,9 @@ import { lineMatchTransformer } from "@/Transformer"
 
 
 
+export id = "pilcrow/markdown/magic-dependencies"
+
+depMatch :: Dependency -> String
 export depMatch = (d) => {
   link = pipe(
     .url,
@@ -30,19 +38,17 @@ export depMatch = (d) => {
   return ` - [${ref}](//github.com/${link})`
 }
 
+transformerWithJson :: MadlibDotJson -> LineTransformerFunction b
+export transformerWithJson = (json, _, _, _) => pipe(
+  .dependencies,
+  fromMaybe([]),
+  map(depMatch),
+  String.unlines,
+)(json)
+
 export rule = (json) => Rule.lineRule(
   false,
-  "pilcrow/markdown/magic-dependencies",
+  id,
   [],
-  [
-    lineMatchTransformer(
-      CONSTANTS.DEPENDENCIES,
-      (_, _, _) => pipe(
-        .dependencies,
-        fromMaybe([]),
-        map(depMatch),
-        String.unlines,
-      )(json),
-    ),
-  ],
+  [lineMatchTransformer(CONSTANTS.DEPENDENCIES, transformerWithJson(json))],
 )

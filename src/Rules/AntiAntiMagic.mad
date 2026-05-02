@@ -1,3 +1,6 @@
+import type { Rule } from "spirit-gum/Rule"
+import type { LineTransformerFunction } from "spirit-gum/Rule/TransformerLine"
+
 import String from "String"
 
 import Rule from "spirit-gum/Rule"
@@ -7,9 +10,10 @@ import { CONSTANTS } from "@/Constants"
 
 
 
-export rule = Rule.lineRule(
-  false,
-  "pilcrow/markdown/anti-anti-magic",
-  [],
-  [LTransformer.ofLine((_, _, x) => String.replace(CONSTANTS.ESCAPE_ESC_MADLIB, "$__MADLIB__", x))],
-)
+export id = "pilcrow/markdown/anti-anti-magic"
+
+transformer :: LineTransformerFunction a
+export transformer = (_, _, x) => String.replace(CONSTANTS.ESCAPE_ESC_MADLIB, "$__MADLIB__", x)
+
+rule :: Rule a
+export rule = Rule.lineRule(false, id, [], [LTransformer.ofLine(transformer)])

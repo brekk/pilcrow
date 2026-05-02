@@ -1,0 +1,20 @@
+import Study from "Study"
+import Rule from "spirit-gum/Rule"
+
+import { id, rule, transformer } from "@/Rules/AntiAntiMagic"
+
+
+
+Study.report(Rule.id, "validate id", [#[rule, id]])
+transformerTest = Study.report(Study.caseN3(transformer))
+
+ID = "pilcrow:rule:" ++ id
+transformerTest(
+  ID ++ " - common",
+  [#[#[{}, -1, ""], ""], #[#[{}, -1, "$____MADLIB____"], "$__MADLIB__"]],
+)
+transformerTest(
+  ID ++ " - doesn't affect an anti-magic value",
+  [#[#[{}, -1, "$__MADLIB__"], "$__MADLIB__"]],
+)
+transformerTest(ID ++ " - doesn't affect a magic value", [#[#[{}, -1, "$MADLIB"], "$MADLIB"]])

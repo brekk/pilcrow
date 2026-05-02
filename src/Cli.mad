@@ -1,13 +1,12 @@
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
+import type { VFileError } from "spirit-gum/Errors"
+
 import File from "File"
 import Fn from "Function"
 import IO from "IO"
 import List from "List"
 import String from "String"
 import Wish from "Wish"
-
-import Line from "spirit-gum/Line"
-import Template from "spirit-gum/Template"
-import VFile from "spirit-gum/VFile"
 
 import _List from "@/List"
 import MadlibJson from "@/MadlibJson"
@@ -16,6 +15,7 @@ import { rulesFromJson } from "@/Rules"
 
 
 
+madlibJson :: Wish VFileError MadlibDotJson
 madlibJson = MadlibJson.read("./madlib.json")
 
 PILCROW = IO.green("¶")
