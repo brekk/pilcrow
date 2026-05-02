@@ -1,3 +1,12 @@
+import type { Dependency } from "mad-at-json/Parse/Dependency"
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
+import type { Rule } from "spirit-gum/Rule"
+import type { LineTransformer } from "spirit-gum/Rule/TransformerLine"
+
+import List from "List"
+import { fromMaybe } from "Maybe"
+import String from "String"
+
 import Rule from "spirit-gum/Rule"
 
 import { CONSTANTS } from "@/Constants"
@@ -5,11 +14,15 @@ import { lineMatchTransformer } from "@/Transformer"
 
 
 
-MADLIB_PROJECT = "[![Madlib Project Badge](https://img.shields.io/badge/madlib-purple?logo=github&logoSize=auto)](//github.com/madlib-lang/madlib)"
+export id = "pilcrow/markdown/magic-madlib-badge"
 
-export rule = Rule.lineRule(
-  false,
-  "pilcrow/markdown/magic-madlib-badge",
-  [],
-  [lineMatchTransformer(CONSTANTS.MADLIB_BADGE, (_, _, _) => MADLIB_PROJECT)],
-)
+
+export MADLIB_PROJECT = "[![Madlib Project Badge](https://img.shields.io/badge/madlib-purple?logo=github&logoSize=auto)](//github.com/madlib-lang/madlib)"
+
+export transformer = (_, _, _) => MADLIB_PROJECT
+
+lineTransformer :: LineTransformer a
+export lineTransformer = lineMatchTransformer(CONSTANTS.MADLIB_BADGE, transformer)
+
+rule :: Rule a
+export rule = Rule.lineRule(false, id, [], [lineTransformer])

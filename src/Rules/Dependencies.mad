@@ -25,6 +25,8 @@ export depMatch = (d) => {
     List.slice(2, -4),
     String.join("/"),
   )(d)
+  // current tooling uses `description` but the description is always `name`
+  // definitions allow for both, but current tooling clobbers one
   name = pipe(
     .name,
     fromMaybe(""),
@@ -38,17 +40,21 @@ export depMatch = (d) => {
   return ` - [${ref}](//github.com/${link})`
 }
 
-transformerWithJson :: MadlibDotJson -> LineTransformerFunction b
-export transformerWithJson = (json, _, _, _) => pipe(
+generateDeps :: MadlibDotJson -> String
+export generateDeps = pipe(
   .dependencies,
   fromMaybe([]),
   map(depMatch),
   String.unlines,
-)(json)
+)
 
+lineTransformer :: MadlibDotJson -> LineTransformerFunction a
+export lineTransformer = (json, _, _, _) => generateDeps(json)
+
+rule :: MadlibDotJson -> Rule a
 export rule = (json) => Rule.lineRule(
   false,
   id,
   [],
-  [lineMatchTransformer(CONSTANTS.DEPENDENCIES, transformerWithJson(json))],
+  [lineMatchTransformer(CONSTANTS.DEPENDENCIES, lineTransformer(json))],
 )

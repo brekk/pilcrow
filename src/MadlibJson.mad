@@ -1,3 +1,8 @@
+import type { Wish } from "Wish"
+
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
+import type { VFileError } from "spirit-gum/Errors"
+
 import File from "File"
 
 import MadlibJson from "mad-at-json/Parse/MadlibJson"
@@ -15,3 +20,8 @@ export read = pipe(
     ),
   ),
 )
+
+export alias MadlibDotWish = Wish VFileError MadlibDotJson
+
+madlibJson :: MadlibDotWish
+export madlibJson = read("./madlib.json")

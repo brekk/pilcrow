@@ -1,0 +1,91 @@
+import type { Wish } from "Wish"
+
+import type { Dependency } from "mad-at-json/Parse/Dependency"
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
+import type { Version } from "mad-at-json/Version"
+import type { VFileError } from "spirit-gum/Errors"
+
+import { Just, Nothing, fromMaybe } from "Maybe"
+import { Error } from "Test"
+import Wish from "Wish"
+
+import Study from "Study"
+import { AnyVersion, Version, VersionRange } from "mad-at-json/Version"
+import Rule from "spirit-gum/Rule"
+
+import { madlibJson } from "@/MadlibJson"
+import { depMatch, generateDeps, id, lineTransformer, rule } from "@/Rules/Dependencies"
+
+
+
+Study.asyncReport(
+  pipe(
+    map(
+      pipe(
+        rule,
+        Rule.id,
+      ),
+    ),
+    Wish.mapRej((_) => Error("Barf")),
+  ),
+  "validate id",
+  [#[madlibJson, id]],
+)
+
+// transformerTest = Study.asyncReport(Study.caseN4(transformerWithJson))
+
+ID = "pilcrow:rule:" ++ id
+
+Study.asyncReport(
+  pipe(
+    map(generateDeps),
+    Wish.mapRej((_) => Error("Barf")),
+  ),
+  ID ++ " - generates",
+  [
+    #[
+      madlibJson,
+      ` - [mad-at-json](//github.com/brekk/study)
+ - [Study](//github.com/brekk/study)
+ - [PartyBus](//github.com/brekk/party-bus)
+ - [spirit-gum](//github.com/brekk/spirit-gum)`,
+    ],
+  ],
+)
+
+
+EXAMPLE_URL = "https://github.com/brekk/study/archive/refs/tags/v0.0.1.zip"
+
+Study.report(
+  depMatch,
+  "depMatch will convert a dependency into a link",
+  [
+    #[
+      {
+        description: Nothing,
+        name: Just("test"),
+        url: EXAMPLE_URL,
+        sanitizedUrl: "",
+        versionRange: AnyVersion,
+      },
+      " - [test](//github.com/brekk/study)",
+    ],
+  ],
+)
+
+Study.asyncReport(
+  pipe(
+    map(lineTransformer($, {}, 1, "<!-- $MADLIB.dependencies -->")),
+    Wish.mapRej((_) => Error("Barf")),
+  ),
+  ID ++ " - generates corretly",
+  [
+    #[
+      madlibJson,
+      ` - [mad-at-json](//github.com/brekk/study)
+ - [Study](//github.com/brekk/study)
+ - [PartyBus](//github.com/brekk/party-bus)
+ - [spirit-gum](//github.com/brekk/spirit-gum)`,
+    ],
+  ],
+)

@@ -1,0 +1,15 @@
+import Study from "Study"
+import Rule from "spirit-gum/Rule"
+
+import { MADLIB_PROJECT, id, rule, transformer } from "@/Rules/MagicBadge"
+
+
+
+Study.report(Rule.id, "validate id", [#[rule, id]])
+transformerTest = Study.report(Study.caseN3(transformer))
+
+ID = "pilcrow:rule:" ++ id
+transformerTest(
+  ID ++ " - common",
+  [#[#[{}, -1, ""], MADLIB_PROJECT], #[#[{}, -1, "doesn't matter"], MADLIB_PROJECT]],
+)
