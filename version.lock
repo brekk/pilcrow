@@ -1,15 +1,11 @@
 {
-  "buildHash": "942e4ae903c9901e1202598dc4e263bf",
+  "buildHash": "7b810e0b206fa75baa1db0e5ef5d5027",
   "jsApi": {
     "apiInstances": [],
     "apiAliases": {},
     "apiInterfaces": {},
     "apiNames": {
-      "linkMadFilesToDomainWithPath": "String -> String -> String -> #[String, String]",
-      "replaceMadlibFileByPattern": "String -> String -> String",
-      "linkMadFilesToGithub": "String -> String -> #[String, String]",
-      "hasSlash": "String -> Boolean",
-      "hasMadlibFile": "String -> Boolean"
+      "runner": "a -> (a -> List (Rule { files :: List b })) -> String -> Wish VFileError String"
     },
     "apiTypes": {}
   },
@@ -18,13 +14,9 @@
     "apiAliases": {},
     "apiInterfaces": {},
     "apiNames": {
-      "linkMadFilesToDomainWithPath": "String -> String -> String -> #[String, String]",
-      "replaceMadlibFileByPattern": "String -> String -> String",
-      "linkMadFilesToGithub": "String -> String -> #[String, String]",
-      "hasSlash": "String -> Boolean",
-      "hasMadlibFile": "String -> Boolean"
+      "runner": "a -> (a -> List (Rule { files :: List b })) -> String -> Wish VFileError String"
     },
     "apiTypes": {}
   },
-  "versionHash": "fbacc30a1f288ebf360ad2de66710082"
+  "versionHash": "47cd76e43f74bbc2e1baaf194d07e1fa"
 }
