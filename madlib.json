@@ -1,8 +1,8 @@
 {
   "name": "pilcrow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "src/Pilcrow.mad",
-  "bin": "src/Pilcrow.mad",
+  "bin": "src/Cli.mad",
   "importAliases": {
     ".": "src"
   },
