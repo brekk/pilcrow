@@ -1,8 +1,3 @@
-import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
-import type { VFileError } from "spirit-gum/Errors"
-
-import File from "File"
-import Fn from "Function"
 import IO from "IO"
 import List from "List"
 import String from "String"

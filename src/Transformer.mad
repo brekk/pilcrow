@@ -1,3 +1,5 @@
+import Fn from "Function"
+import List from "List"
 import String from "String"
 
 import LTransformer from "spirit-gum/Rule/TransformerLine"
@@ -6,12 +8,16 @@ import { CONSTANTS } from "@/Constants"
 
 
 
+EXCEPTIONS = ["<!-- $MADLIB.dependencies -->"]
+
 stripHTMLComment = String.replace(CONSTANTS.HTML_COMMENT, "")
-export lineMatchTransformer = (toMatch, replacer) => LTransformer.ofLineRaw(
+
+export idempotentConstantTransformer = (except, toMatch, replacer) => LTransformer.ofLineRaw(
   (meta, index, line) => {
     hasBadge = String.match(toMatch, line)
     ref = String.replace(CONSTANTS.HTML_CAPTURING_COMMENT, "$2", line)
-    ref2 = ref == "<!-- $MADLIB.json.dependencies -->" ? "" : ref
+    ref2 = List.any(Fn.equals(ref), except) ? "" : ref
     return #[meta, hasBadge ? replacer(meta, index, stripHTMLComment(line)) ++ " " ++ ref2 : line]
   },
 )
+export lineMatchTransformer = idempotentConstantTransformer(EXCEPTIONS)

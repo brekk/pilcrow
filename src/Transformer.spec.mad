@@ -1,0 +1,21 @@
+import Study from "Study"
+import { LineRawTransformer } from "spirit-gum/Rule/TransformerLine"
+
+import { lineMatchTransformer } from "@/Transformer"
+
+
+
+matcho = lineMatchTransformer("^hello", (_, _, v) => v ++ v)
+
+Study.report(
+  where(matcho) {
+    LineRawTransformer(fn) =>
+      fn({}, -1)
+  },
+  "lineMatchTransformer",
+  [
+    #["hello", #[{}, "hellohello hello"]],
+    #["nono", #[{}, "nono"]],
+    #["<!-- $MADLIB.dependencies -->", #[{}, "<!-- $MADLIB.dependencies -->"]],
+  ],
+)
