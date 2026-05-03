@@ -1,0 +1,42 @@
+import Party from "PartyBus"
+
+
+
+export tags = {
+  pilcrow: Party.tag("pilcrow"),
+  rule: Party.tagWithScope("pilcrow", ["rule"]),
+  ruleBadgeAA: Party.tagWithScope("rule", ["anti-anti-magic-badge"]),
+  ruleBadgeA: Party.tagWithScope("rule", ["anti-magic-badge"]),
+  ruleBadge: Party.tagWithScope("pilcrow", ["rule", "badge"]),
+  ruleDeps: Party.tagWithScope("rule", ["dependencies"]),
+  ruleFiles: Party.tagWithScope("pilcrow", ["rule", "files"]),
+  ruleVersion: Party.tagWithScope("pilcrow", ["rule", "version"]),
+  cli: Party.tagWithScope("pilcrow", ["cli"]),
+  transform: Party.tagWithScope("pilcrow", ["transform"]),
+}
+
+export log = {
+  pilcrow: Party.env(tags.pilcrow),
+  rule: Party.env(tags.rule),
+  ruleBadgeAA: Party.env(tags.ruleBadgeAA),
+  ruleBadgeA: Party.env(tags.ruleBadgeA),
+  ruleBadge: Party.env(tags.ruleBadge),
+  ruleDeps: Party.env(tags.ruleDeps),
+  ruleFiles: Party.env(tags.ruleFiles),
+  ruleVersion: Party.env(tags.ruleVersion),
+  cli: Party.env(tags.cli),
+  transform: Party.env(tags.transform),
+}
+
+export tapped = {
+  pilcrow: Party.tap(log.pilcrow),
+  rule: Party.tap(log.rule),
+  ruleBadgeAA: Party.tap(log.ruleBadgeAA),
+  ruleBadgeA: Party.tap(log.ruleBadgeA),
+  ruleBadge: Party.tap(log.ruleBadge),
+  ruleDeps: Party.tap(log.ruleDeps),
+  ruleFiles: Party.tap(log.ruleFiles),
+  ruleVersion: Party.tap(log.ruleVersion),
+  cli: Party.tap(log.cli),
+  transform: Party.tap(log.transform),
+}

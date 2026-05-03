@@ -21,9 +21,9 @@ write = (path, x) => chain(
   ),
 )(x)
 
-export runner = (json, rulesFn, src) => pipe(
-  VFile.fromPath(src, rulesFn(json)),
-  Wish.mapRej((_) => "Unable to read from: " ++ src),
+export runner = (json, rulesFn, input, output) => pipe(
+  VFile.fromPath(input, rulesFn(json)),
+  Wish.mapRej((_) => "Unable to read from: " ++ input),
   map(Template.renderWithConverter(map(Line.render), (_, l, _) => String.unlines(l))),
-  write(src),
+  write(output),
 )(INITIAL_STATE)

@@ -1,0 +1,10 @@
+pilcrow
+- rule
+- ruleBadgeAA = rule:anti-anti-magic-badge
+- ruleBadgeA = rule:anti-magic-badge
+- rule:badge
+- ruleDeps = rule:dependencies
+- rule:files
+- rule:version
+- cli
+- transform

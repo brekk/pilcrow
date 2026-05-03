@@ -152,26 +152,22 @@ main = (args) => {
     map(processFlagState(INITIAL_STATE, captureTheFlag)),
     Either.fromRight(INITIAL_STATE),
     /* do stuff based on that state */
-    (p) => if (p.showHelp) {
-      Wish.bad(renderHelp(p.color, FLAGS))
+    ({ madlibJson, input, output, color, showHelp }) => if (showHelp) {
+      Wish.bad(renderHelp(color, FLAGS))
     } else do {
-      { madlibJson, input, output } = p
       sourceJsonPath = Maybe.fromMaybe("./madlib.json", madlibJson)
       return pipe(
-        IO.pTrace("path to read"),
         MadlibJson.read,
-        map(IO.pTrace("read?")),
         Wish.mapRej((_) => "Unable to read!"),
         chain(
-          (json) => where(input) {
-            Just(i) =>
-              Pilcrow.runner(json, rulesFromJson, i)
+          (json) => where(#[input, output]) {
+            #[Just(i), Just(o)] =>
+              Pilcrow.runner(json, rulesFromJson, i, o)
 
-            Nothing =>
-              Wish.bad("input")
+            _ =>
+              Wish.bad("Unable to process the given instructions.\n" ++ renderHelp(color, FLAGS))
           },
         ),
-        map(IO.pTrace("OUT")),
       )(sourceJsonPath)
     },
     fillfull("Error:", "SUCCESS"),
