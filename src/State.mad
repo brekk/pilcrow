@@ -12,6 +12,7 @@ export alias PilcrowState = {
   madlibJson :: Maybe String,
   output :: Maybe String,
   overwrite :: Boolean,
+  repo :: Maybe String,
   showHelp :: Boolean,
 }
 
@@ -19,6 +20,7 @@ export alias PilcrowState = {
 INITIAL_STATE :: PilcrowState
 export INITIAL_STATE = {
   // used in the cli arg parsing process
+  repo: Nothing,
   auto: false,
   color: true,
   input: Nothing,

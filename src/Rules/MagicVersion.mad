@@ -1,3 +1,7 @@
+import Fn from "Function"
+import List from "List"
+import String from "String"
+
 import Version from "mad-at-json/Version"
 import Rule from "spirit-gum/Rule"
 
@@ -12,11 +16,30 @@ export madlibVersionWithLink = (link, { version, name }) => {
   vvv = Version.showVersion(version)
   return `[![${name} v${vvv}](https://img.shields.io/badge/v${vvv}-purple?label=version)](${link})`
 }
-export madlibVersion = madlibVersionWithLink("//github.com/brekk/pilcrow")
+// export madlibVersion = madlibVersionWithLink("//github.com/brekk/pilcrow")
 
-export rule = (json) => Rule.lineRule(
+expandShortNameToGithub = Fn.when(
+  Fn.both(
+    Fn.both(String.match("/"), Fn.complement(String.startsWith("/"))),
+    pipe(
+      String.split("/"),
+      List.length,
+      Fn.equals(2),
+    ),
+  ),
+  mappend("//github.com/"),
+)
+
+
+
+export rule = (repo, json) => Rule.lineRule(
   false,
   id,
   [],
-  [lineMatchTransformer(CONSTANTS.VERSION, (_, _, _) => madlibVersion(json))],
+  [
+    lineMatchTransformer(
+      CONSTANTS.VERSION,
+      (_, _, _) => madlibVersionWithLink(expandShortNameToGithub(repo), json),
+    ),
+  ],
 )

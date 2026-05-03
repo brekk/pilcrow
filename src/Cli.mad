@@ -16,6 +16,7 @@ import EFlags from "ensign/Flags"
 import VFile from "spirit-gum/VFile"
 
 import _List from "@/List"
+import Party from "@/Log"
 import MadlibJson from "@/MadlibJson"
 import Pilcrow from "@/Pilcrow"
 import { rulesFromJson } from "@/Rules"
@@ -41,31 +42,16 @@ export FLAGS = [
   ),
   Ensign.flagBoolean("auto", ["A"], "Overwrite existing input file. Implies `--overwrite`"),
   Ensign.flagString("rulefile", ["r"], "The .pilcrowrc file to read from"),
+  Ensign.flagString(
+    "repo",
+    ["R"],
+    "The repo path for this project. Can be shorthand, like `brekk/ensign`",
+  ),
 ]
 
 // export validatedFlags = Ensign.validate(FLAGS)
 
-renderGoodPath = Fn.ifElse(
-  List.isEmpty,
-  (_) => "No files to process",
-  (processed) => PILCROW
-      ++ " "
-      ++ String.join(" " ++ PILCROW ++ " ", processed)
-      ++ "\n\tProcessed: "
-      ++ show(List.length(processed))
-      ++ " files",
-)
-
-
-fillfull = (badMsg, goodMsg, wish) => Wish.fulfill(
-  (bad) => {
-    IO.pTrace(badMsg, bad)
-  },
-  (g) => {
-    IO.pTrace(goodMsg, g)
-  },
-  wish,
-)
+fillfull = (wish) => Wish.fulfill((bad) => { IO.putLine(bad) }, (g) => { IO.putLine(g) }, wish)
 
 
 renderHelp = (useColor, flags) => {
@@ -114,6 +100,8 @@ captureTheFlag = (state, flag) => where(flag) {
       #[false, { ...state, output: Just(v) }]
     } else if (k == "input") {
       #[false, { ...state, input: Just(v) }]
+    } else if (k == "repo") {
+      #[false, { ...state, repo: Just(v) }]
     } else {
       #[false, state]
     }
@@ -152,24 +140,28 @@ main = (args) => {
     map(processFlagState(INITIAL_STATE, captureTheFlag)),
     Either.fromRight(INITIAL_STATE),
     /* do stuff based on that state */
-    ({ madlibJson, input, output, color, showHelp }) => if (showHelp) {
+    ({ madlibJson, input, output, color, showHelp, repo }) => if (showHelp) {
       Wish.bad(renderHelp(color, FLAGS))
     } else do {
       sourceJsonPath = Maybe.fromMaybe("./madlib.json", madlibJson)
       return pipe(
         MadlibJson.read,
         Wish.mapRej((_) => "Unable to read!"),
+        map(Party.log.cli("Parsed madlib.json?")),
         chain(
-          (json) => where(#[input, output]) {
-            #[Just(i), Just(o)] =>
-              Pilcrow.runner(json, rulesFromJson, i, o)
+          (json) => where(#[input, output, repo]) {
+            #[Just(i), Just(o), Just(_repo)] =>
+              Pilcrow.runner(json, rulesFromJson(_repo), i, o)
 
             _ =>
-              Wish.bad("Unable to process the given instructions.\n" ++ renderHelp(color, FLAGS))
+              Wish.bad(
+                "Unable to process the given instructions, `input`, `output`, and `repo` are all required.\n"
+                  ++ renderHelp(color, FLAGS),
+              )
           },
         ),
       )(sourceJsonPath)
     },
-    fillfull("Error:", "SUCCESS"),
+    fillfull,
   )(args)
 }

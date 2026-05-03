@@ -7,9 +7,9 @@ import MagicVersion from "@/Rules/MagicVersion"
 
 
 
-export rulesFromJson = (json) => [
+export rulesFromJson = (repo, json) => [
   MagicBadge.rule,
-  MagicVersion.rule(json),
+  MagicVersion.rule(repo, json),
   Files.rule(json.name),
   Dependencies.rule(json),
   AntiMagic.rule,
