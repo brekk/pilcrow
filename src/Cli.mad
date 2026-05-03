@@ -136,6 +136,26 @@ captureTheFlag = (state, flag) => where(flag) {
     }
 }
 
+ifFileEmpty = (o, goodPath) => pipe(
+  File.exists,
+  Wish.mapRej((_) => `${o} can't be inspected`),
+  chain(
+    (fail) => (
+      fail
+        ? Wish.bad(`${o} already exists. (Use --force if you know what you're doing.)`)
+        : goodPath(o)
+    ),
+  ),
+)(o)
+
+HELP_ME = "Try `pilcrow --help` for more info"
+
+CAN_NO_CAN = "Unable to process the given instructions. `--input` and `--repo` are required. (If you wish to unsafely overwrite inputs, try `--force` or `--auto`, at your own risk.)\n"
+  ++ HELP_ME
+
+NO_CAN_NO_CAN = "Unable to process the given instructions. `--input`, `--output`, and `--repo` are required.\n"
+  ++ HELP_ME
+
 main = (args) => {
   pipe(
     /* cut the first argument, it's the name of this file */
@@ -159,28 +179,23 @@ main = (args) => {
           (json) => where(#[input, _output, repo]) {
             #[Just(i), Just(o), Just(_repo)] =>
               if (!overwrite) {
-                pipe(
-                  File.exists,
-                  Wish.mapRej((_) => `${o} can't be inspected`),
-                  chain(
-                    (fail) => (
-                      fail
-                        ? Wish.bad(
-                          `${o} already exists. (Use --force if you know what you're doing.)`,
-                        )
-                        : Pilcrow.runner(json, rulesFromJson(_repo), i, o)
-                    ),
-                  ),
-                )(o)
+                ifFileEmpty(o, Pilcrow.runner(json, rulesFromJson(_repo), i))
               } else {
                 Pilcrow.runner(json, rulesFromJson(_repo), i, o)
               }
 
+            #[Just(i), Nothing, Just(_repo)] =>
+              if (!overwrite && auto) {
+                ifFileEmpty(i, Pilcrow.runner(json, rulesFromJson(_repo), i))
+              } else if (auto) {
+                Pilcrow.runner(json, rulesFromJson(_repo), i, i)
+              } else {
+                // if you wanna overwrite, you can, but you need to tell us
+                Wish.bad(CAN_NO_CAN)
+              }
+
             _ =>
-              Wish.bad(
-                "Unable to process the given instructions, `--input`, `--output`, and `--repo` are all required.\n"
-                  ++ "Try `pilcrow --help`",
-              )
+              Wish.bad(NO_CAN_NO_CAN)
           },
         ),
       )(sourceJsonPath)
