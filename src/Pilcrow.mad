@@ -1,3 +1,6 @@
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
+import type { WishCFile } from "spirit-gum/VFile"
+
 import type { PilcrowState } from "@/State"
 
 import File from "File"
@@ -6,6 +9,7 @@ import String from "String"
 import Wish from "Wish"
 
 import Line from "spirit-gum/Line"
+import Rule from "spirit-gum/Rule"
 import Template from "spirit-gum/Template"
 import VFile from "spirit-gum/VFile"
 
@@ -22,6 +26,11 @@ write = (path, x) => chain(
   ),
 )(x)
 
+runner :: MadlibDotJson
+  -> (MadlibDotJson -> List (Rule PilcrowState))
+  -> String
+  -> String
+  -> Wish String String
 export runner = (json, rulesFn, input, output) => pipe(
   VFile.fromPath(
     input,

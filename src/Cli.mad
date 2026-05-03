@@ -3,6 +3,7 @@ import type { Flag } from "ensign"
 import type { PilcrowState } from "@/State"
 
 import Either from "Either"
+import File from "File"
 import Fn from "Function"
 import IO from "IO"
 import List from "List"
@@ -25,22 +26,28 @@ import { INITIAL_STATE } from "@/State"
 
 
 PILCROW = IO.green("¶")
+BAD_PILCROW = IO.red("¶")
 
 export FLAGS = [
-  Ensign.flagBoolean("help", ["h"], "Print the help text for pilcrow"),
+  Ensign.flagBoolean("help", ["h"], "This text you're reading!"),
+  Ensign.flagBoolean(
+    "color",
+    ["K"],
+    "Toggle whether this tool should render with color. (Default: true)",
+  ),
   Ensign.flagString(
     "madlib-json",
     ["madlib", "M"],
-    "Set the path to `madlib.json`. Defaults to ./madlib.json",
+    "Set the path to `madlib.json`. (Default: ./madlib.json)",
   ),
-  Ensign.flagString("input", ["i"], "The markdown file to read"),
-  Ensign.flagString("output", ["o"], "The markdown file to write"),
+  Ensign.flagString("input", ["i"], "The markdown file to read. Required"),
+  Ensign.flagString("output", ["o"], "The markdown file to write. Required"),
   Ensign.flagBoolean(
-    "overwrite",
-    ["w"],
+    "force",
+    ["f"],
     "Overwrite existing output file. Implies `--input` is the same as `--output`",
   ),
-  Ensign.flagBoolean("auto", ["A"], "Overwrite existing input file. Implies `--overwrite`"),
+  Ensign.flagBoolean("auto", ["A"], "Overwrite existing input file. Implies `--force`"),
   Ensign.flagString("rulefile", ["r"], "The .pilcrowrc file to read from"),
   Ensign.flagString(
     "repo",
@@ -51,12 +58,20 @@ export FLAGS = [
 
 // export validatedFlags = Ensign.validate(FLAGS)
 
-fillfull = (wish) => Wish.fulfill((bad) => { IO.putLine(bad) }, (g) => { IO.putLine(g) }, wish)
+fillfull = (wish) => Wish.fulfill(
+  (bad) => {
+    IO.putLine(BAD_PILCROW ++ " " ++ bad)
+  },
+  (g) => {
+    IO.putLine(PILCROW ++ " " ++ g)
+  },
+  wish,
+)
 
 
 renderHelp = (useColor, flags) => {
   fn = (useColor ? Ensign.printLegendWithColor : Ensign.printLegend)
-  return fn(flags)
+  return " pilcrow\na magic helper for madlib README files\n\n" ++ fn(flags)
 }
 
 
@@ -108,27 +123,18 @@ captureTheFlag = (state, flag) => where(flag) {
 
   EFlags.FlagToggle(k, v) =>
     if (k == "help" && v) {
+      // exclusive / short-circuiting
       #[true, { ...state, showHelp: v }]
     } else if (k == "color" && !v) {
       #[false, { ...state, color: v }]
     } else if (k == "auto" && v) {
-      #[false, { ...state, auto: v }]
-    } else if (k == "overwrite" && v) {
+      #[false, { ...state, auto: v, overwrite: true }]
+    } else if (k == "force" && v) {
       #[false, { ...state, overwrite: v }]
     } else {
       #[false, state]
     }
 }
-
-/*
-
-chain(
-  (json) => pipe(
-    map(Pilcrow.runner(json, rulesFromJson)),
-    Wish.parallel,
-  )(args),
-)
-*/
 
 main = (args) => {
   pipe(
@@ -140,23 +146,40 @@ main = (args) => {
     map(processFlagState(INITIAL_STATE, captureTheFlag)),
     Either.fromRight(INITIAL_STATE),
     /* do stuff based on that state */
-    ({ madlibJson, input, output, color, showHelp, repo }) => if (showHelp) {
+    ({ madlibJson, auto, overwrite, input, output, color, showHelp, repo }) => if (showHelp) {
       Wish.bad(renderHelp(color, FLAGS))
     } else do {
       sourceJsonPath = Maybe.fromMaybe("./madlib.json", madlibJson)
+      _output = auto && overwrite ? input : output
       return pipe(
         MadlibJson.read,
         Wish.mapRej((_) => "Unable to read!"),
         map(Party.log.cli("Parsed madlib.json?")),
         chain(
-          (json) => where(#[input, output, repo]) {
+          (json) => where(#[input, _output, repo]) {
             #[Just(i), Just(o), Just(_repo)] =>
-              Pilcrow.runner(json, rulesFromJson(_repo), i, o)
+              if (!overwrite) {
+                pipe(
+                  File.exists,
+                  Wish.mapRej((_) => `${o} can't be inspected`),
+                  chain(
+                    (fail) => (
+                      fail
+                        ? Wish.bad(
+                          `${o} already exists. (Use --force if you know what you're doing.)`,
+                        )
+                        : Pilcrow.runner(json, rulesFromJson(_repo), i, o)
+                    ),
+                  ),
+                )(o)
+              } else {
+                Pilcrow.runner(json, rulesFromJson(_repo), i, o)
+              }
 
             _ =>
               Wish.bad(
-                "Unable to process the given instructions, `input`, `output`, and `repo` are all required.\n"
-                  ++ renderHelp(color, FLAGS),
+                "Unable to process the given instructions, `--input`, `--output`, and `--repo` are all required.\n"
+                  ++ "Try `pilcrow --help`",
               )
           },
         ),

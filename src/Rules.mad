@@ -1,3 +1,8 @@
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
+import type { Rule } from "spirit-gum/Rule"
+
+import type { PilcrowState } from "@/State"
+
 import AntiAntiMagic from "@/Rules/AntiAntiMagic"
 import AntiMagic from "@/Rules/AntiMagic"
 import Dependencies from "@/Rules/Dependencies"
@@ -7,6 +12,7 @@ import MagicVersion from "@/Rules/MagicVersion"
 
 
 
+rulesFromJson :: String -> MadlibDotJson -> List (Rule PilcrowState)
 export rulesFromJson = (repo, json) => [
   MagicBadge.rule,
   MagicVersion.rule(repo, json),

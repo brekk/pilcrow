@@ -10,6 +10,8 @@ export zigzag = (check, yesThen, noElse, either) => where(either) {
     either
 }
 
+export zag = zigzag($, $, (x) => x)
+
 export toLeftBy = (fn, either) => where(either) {
   Either.Right(a) =>
     Either.Left(fn(a))
