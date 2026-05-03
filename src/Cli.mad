@@ -1,4 +1,5 @@
 import type { Flag } from "ensign"
+import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
 
 import type { PilcrowState } from "@/State"
 
@@ -42,12 +43,8 @@ export FLAGS = [
   ),
   Ensign.flagString("input", ["i"], "The markdown file to read. Required"),
   Ensign.flagString("output", ["o"], "The markdown file to write. Required"),
-  Ensign.flagBoolean(
-    "force",
-    ["f"],
-    "Overwrite existing output file. Implies `--input` is the same as `--output`",
-  ),
-  Ensign.flagBoolean("auto", ["A"], "Overwrite existing input file. Implies `--force`"),
+  Ensign.flagBoolean("force", ["f"], "Overwrite existing output file"),
+  Ensign.flagBoolean("auto", ["A"], "Overwrite existing input file."),
   Ensign.flagString("rulefile", ["r"], "The .pilcrowrc file to read from"),
   Ensign.flagString(
     "repo",
@@ -56,26 +53,13 @@ export FLAGS = [
   ),
 ]
 
-// export validatedFlags = Ensign.validate(FLAGS)
 
-fillfull = (wish) => Wish.fulfill(
-  (bad) => {
-    IO.putLine(BAD_PILCROW ++ " " ++ bad)
-  },
-  (g) => {
-    IO.putLine(PILCROW ++ " " ++ g)
-  },
-  wish,
-)
 
 
 renderHelp = (useColor, flags) => {
   fn = (useColor ? Ensign.printLegendWithColor : Ensign.printLegend)
   return " pilcrow\na magic helper for madlib README files\n\n" ++ fn(flags)
 }
-
-
-
 
 processFlagState :: PilcrowState
   -> (PilcrowState -> Flag -> #[Boolean, PilcrowState])
@@ -128,7 +112,7 @@ captureTheFlag = (state, flag) => where(flag) {
     } else if (k == "color" && !v) {
       #[false, { ...state, color: v }]
     } else if (k == "auto" && v) {
-      #[false, { ...state, auto: v, overwrite: true }]
+      #[false, { ...state, auto: v }]
     } else if (k == "force" && v) {
       #[false, { ...state, overwrite: v }]
     } else {
@@ -148,13 +132,80 @@ ifFileEmpty = (o, goodPath) => pipe(
   ),
 )(o)
 
+thrappend = (a, b, c) => a ++ b ++ c
+spaced = thrappend($, " ")
+lined = thrappend($, "\n")
+
+fillfull = Wish.fulfill(
+  pipe(
+    spaced(BAD_PILCROW),
+    IO.putLine,
+    Fn.always({}),
+  ),
+  pipe(
+    spaced(PILCROW),
+    IO.putLine,
+    Fn.always({}),
+  ),
+)
+
 HELP_ME = "Try `pilcrow --help` for more info"
 
-CAN_NO_CAN = "Unable to process the given instructions. `--input` and `--repo` are required. (If you wish to unsafely overwrite inputs, try `--force` or `--auto`, at your own risk.)\n"
-  ++ HELP_ME
+AUTO_BUT_CONFUSING = lined(
+  "Unable to run `--auto` with differing `--input` and `--output` specified. (Use `--force` if you know what you're doing, `--output` will be ignored. Or run `--auto` without specifying `--output`.)",
+  HELP_ME,
+)
 
-NO_CAN_NO_CAN = "Unable to process the given instructions. `--input`, `--output`, and `--repo` are required.\n"
-  ++ HELP_ME
+DO_YOU_WANT_AUTO = lined(
+  "Unable to process the given instructions. `--input` and `--repo` are required. (If you wish to unsafely overwrite inputs, try `--force` and `--auto`, at your own risk.)",
+  HELP_ME,
+)
+
+NO_CAN_NO_CAN = "Unable to process the given instructions. `--input`, `--output`, and `--repo` are required."
+
+readReadme = (json, repo, i, o) => Pilcrow.runner(json, rulesFromJson(repo), i, o)
+
+tryRead = (json, repo, i, o) => pipe(
+  readReadme(json, repo),
+  ifFileEmpty(o),
+)(i)
+
+applyMadlibJsonToState :: PilcrowState -> MadlibDotJson -> Wish String String
+applyMadlibJsonToState = ({ input, output, repo, overwrite, auto }, json) => where(#[
+  input,
+  output,
+  repo,
+]) {
+  #[Just(i), Just(o), Just(_repo)] =>
+    do {
+      writer = (overwrite ? readReadme : tryRead)(json, _repo)
+      return if (auto) {
+        if (i != o) {
+          writer(i, i)
+        } else {
+          Wish.bad(AUTO_BUT_CONFUSING)
+        }
+      } else {
+        writer(i, o)
+      }
+    }
+
+  #[Just(i), Nothing, Just(_repo)] =>
+    (
+      if (auto) {
+        if (!overwrite) {
+          tryRead(json, _repo, i, i)
+        } else {
+          readReadme(json, _repo, i, i)
+        }
+      } else {
+        Wish.bad(DO_YOU_WANT_AUTO)
+      }
+    )
+
+  _ =>
+    Wish.bad(NO_CAN_NO_CAN)
+}
 
 main = (args) => {
   pipe(
@@ -166,39 +217,20 @@ main = (args) => {
     map(processFlagState(INITIAL_STATE, captureTheFlag)),
     Either.fromRight(INITIAL_STATE),
     /* do stuff based on that state */
-    ({ madlibJson, auto, overwrite, input, output, color, showHelp, repo }) => if (showHelp) {
-      Wish.bad(renderHelp(color, FLAGS))
-    } else do {
-      sourceJsonPath = Maybe.fromMaybe("./madlib.json", madlibJson)
-      _output = auto && overwrite ? input : output
-      return pipe(
-        MadlibJson.read,
-        Wish.mapRej((_) => "Unable to read!"),
-        map(Party.log.cli("Parsed madlib.json?")),
-        chain(
-          (json) => where(#[input, _output, repo]) {
-            #[Just(i), Just(o), Just(_repo)] =>
-              if (!overwrite) {
-                ifFileEmpty(o, Pilcrow.runner(json, rulesFromJson(_repo), i))
-              } else {
-                Pilcrow.runner(json, rulesFromJson(_repo), i, o)
-              }
-
-            #[Just(i), Nothing, Just(_repo)] =>
-              if (!overwrite && auto) {
-                ifFileEmpty(i, Pilcrow.runner(json, rulesFromJson(_repo), i))
-              } else if (auto) {
-                Pilcrow.runner(json, rulesFromJson(_repo), i, i)
-              } else {
-                // if you wanna overwrite, you can, but you need to tell us
-                Wish.bad(CAN_NO_CAN)
-              }
-
-            _ =>
-              Wish.bad(NO_CAN_NO_CAN)
-          },
-        ),
-      )(sourceJsonPath)
+    (state) => {
+      { madlibJson, auto, overwrite, input, output, color, showHelp } = state
+      return if (showHelp) {
+        Wish.bad(renderHelp(color, FLAGS))
+      } else do {
+        sourceJsonPath = madlibJson ?? "./madlib.json"
+        _output = auto && overwrite ? input : output
+        return pipe(
+          MadlibJson.read,
+          Wish.mapRej((_) => "Unable to read!"),
+          map(Party.log.cli("Parsed madlib.json?")),
+          chain(applyMadlibJsonToState({ ...state, output: _output })),
+        )(sourceJsonPath)
+      }
     },
     fillfull,
   )(args)
