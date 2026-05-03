@@ -1,27 +1,29 @@
+import type { PilcrowState } from "@/State"
+
 import File from "File"
 import Fn from "Function"
 import String from "String"
+import Wish from "Wish"
 
 import Line from "spirit-gum/Line"
 import Template from "spirit-gum/Template"
 import VFile from "spirit-gum/VFile"
 
+import { INITIAL_STATE } from "@/State"
 
-
-INITIAL_STATE = { files: [] }
 
 
 write = (path, x) => chain(
   pipe(
     File.write(path),
-    VFile.forceVFileError,
+    Wish.mapRej((_) => "Unable to write to: " ++ path),
     map(Fn.always(path)),
   ),
 )(x)
 
 export runner = (json, rulesFn, src) => pipe(
   VFile.fromPath(src, rulesFn(json)),
-  VFile.forceVFileError,
+  Wish.mapRej((_) => "Unable to read from: " ++ src),
   map(Template.renderWithConverter(map(Line.render), (_, l, _) => String.unlines(l))),
   write(src),
 )(INITIAL_STATE)

@@ -1,0 +1,27 @@
+import Either from "Either"
+
+
+
+export zigzag = (check, yesThen, noElse, either) => where(either) {
+  Either.Right(a) =>
+    (check(a) ? Either.Left(yesThen(a)) : Either.Right(noElse(a)))
+
+  _ =>
+    either
+}
+
+export toLeftBy = (fn, either) => where(either) {
+  Either.Right(a) =>
+    Either.Left(fn(a))
+
+  _ =>
+    either
+}
+
+export toLeft = (b, either) => where(either) {
+  Either.Right(_) =>
+    Either.Left(b)
+
+  _ =>
+    either
+}

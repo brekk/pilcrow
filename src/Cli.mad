@@ -13,6 +13,7 @@ import Wish from "Wish"
 
 import Ensign from "ensign"
 import EFlags from "ensign/Flags"
+import VFile from "spirit-gum/VFile"
 
 import _List from "@/List"
 import MadlibJson from "@/MadlibJson"
@@ -33,12 +34,12 @@ export FLAGS = [
   ),
   Ensign.flagString("input", ["i"], "The markdown file to read"),
   Ensign.flagString("output", ["o"], "The markdown file to write"),
-  Ensign.flagBoolean("overwrite", ["w"], "Overwrite existing output file"),
   Ensign.flagBoolean(
-    "auto",
-    ["A"],
-    "Overwrite existing input file. Implies `--overwrite`. Implies `--input` is the same as `--output`",
+    "overwrite",
+    ["w"],
+    "Overwrite existing output file. Implies `--input` is the same as `--output`",
   ),
+  Ensign.flagBoolean("auto", ["A"], "Overwrite existing input file. Implies `--overwrite`"),
   Ensign.flagString("rulefile", ["r"], "The .pilcrowrc file to read from"),
 ]
 
@@ -56,30 +57,23 @@ renderGoodPath = Fn.ifElse(
 )
 
 
-fillfull = (badMsg, wish) => Wish.fulfill(
+fillfull = (badMsg, goodMsg, wish) => Wish.fulfill(
   (bad) => {
     IO.pTrace(badMsg, bad)
   },
   (g) => {
-    pipe(
-      renderGoodPath,
-      IO.putLine,
-    )(g)
+    IO.pTrace(goodMsg, g)
   },
   wish,
 )
 
 
-renderHelp = (useColor, flags) => (useColor ? Ensign.printLegendWithColor : Ensign.printLegend)(
-  flags,
-)
+renderHelp = (useColor, flags) => {
+  fn = (useColor ? Ensign.printLegendWithColor : Ensign.printLegend)
+  return fn(flags)
+}
 
-// chain(
-//   (json) => pipe(
-//     map(Pilcrow.runner(json, rulesFromJson)),
-//     Wish.parallel,
-//   )(args),
-// )
+
 
 
 processFlagState :: PilcrowState
@@ -95,9 +89,9 @@ processFlagState = (state, process, flags) => {
         aggState
 
       [a, ...z] =>
-        do {
-          #[stop, upState] = process(aggState, a)
-          return walker(stop, upState, z)
+        where(process(aggState, a)) {
+          #[stop, upState] =>
+            walker(stop, upState, z)
         }
     }
   }
@@ -116,25 +110,70 @@ captureTheFlag = (state, flag) => where(flag) {
   EFlags.Flag(k, v) =>
     if (k == "madlib-json") {
       #[false, { ...state, madlibJson: Just(v) }]
+    } else if (k == "output") {
+      #[false, { ...state, output: Just(v) }]
+    } else if (k == "input") {
+      #[false, { ...state, input: Just(v) }]
     } else {
       #[false, state]
     }
 
   EFlags.FlagToggle(k, v) =>
     if (k == "help" && v) {
-      #[true, { ...state, showHelp: true }]
+      #[true, { ...state, showHelp: v }]
+    } else if (k == "color" && !v) {
+      #[false, { ...state, color: v }]
+    } else if (k == "auto" && v) {
+      #[false, { ...state, auto: v }]
+    } else if (k == "overwrite" && v) {
+      #[false, { ...state, overwrite: v }]
     } else {
       #[false, state]
     }
 }
 
+/*
+
+chain(
+  (json) => pipe(
+    map(Pilcrow.runner(json, rulesFromJson)),
+    Wish.parallel,
+  )(args),
+)
+*/
+
 main = (args) => {
   pipe(
+    /* cut the first argument, it's the name of this file */
     List.drop(1),
+    /* process the given arguments against the legend of the defined flags */
     parseArgs,
-    IO.pTrace("FLAGS!"),
+    /* fold over our flags to build an initial state */
     map(processFlagState(INITIAL_STATE, captureTheFlag)),
-    // fillfull("Error:"),
-    IO.pTrace("OUT"),
+    Either.fromRight(INITIAL_STATE),
+    /* do stuff based on that state */
+    (p) => if (p.showHelp) {
+      Wish.bad(renderHelp(p.color, FLAGS))
+    } else do {
+      { madlibJson, input, output } = p
+      sourceJsonPath = Maybe.fromMaybe("./madlib.json", madlibJson)
+      return pipe(
+        IO.pTrace("path to read"),
+        MadlibJson.read,
+        map(IO.pTrace("read?")),
+        Wish.mapRej((_) => "Unable to read!"),
+        chain(
+          (json) => where(input) {
+            Just(i) =>
+              Pilcrow.runner(json, rulesFromJson, i)
+
+            Nothing =>
+              Wish.bad("input")
+          },
+        ),
+        map(IO.pTrace("OUT")),
+      )(sourceJsonPath)
+    },
+    fillfull("Error:", "SUCCESS"),
   )(args)
 }

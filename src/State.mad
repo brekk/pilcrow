@@ -6,6 +6,8 @@ import { Just, Nothing } from "Maybe"
 
 export alias PilcrowState = {
   auto :: Boolean,
+  color :: Boolean,
+  files :: List String,
   input :: Maybe String,
   madlibJson :: Maybe String,
   output :: Maybe String,
@@ -16,10 +18,14 @@ export alias PilcrowState = {
 
 INITIAL_STATE :: PilcrowState
 export INITIAL_STATE = {
+  // used in the cli arg parsing process
   auto: false,
+  color: true,
   input: Nothing,
   madlibJson: Nothing,
   output: Nothing,
   overwrite: false,
   showHelp: false,
+  // used in the spirit-gum process
+  files: [],
 }
