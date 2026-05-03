@@ -23,5 +23,5 @@ export read = pipe(
 
 export alias MadlibDotWish = Wish VFileError MadlibDotJson
 
-madlibJson :: MadlibDotWish
-export madlibJson = read("./madlib.json")
+local :: MadlibDotWish
+export local = read("./madlib.json")

@@ -1,19 +1,48 @@
+import type { Flag } from "ensign"
+
+import type { PilcrowState } from "@/State"
+
+import Either from "Either"
 import Fn from "Function"
 import IO from "IO"
 import List from "List"
+import { Just, Nothing, fromMaybe } from "Maybe"
+import Maybe from "Maybe"
 import String from "String"
 import Wish from "Wish"
 
 import Ensign from "ensign"
+import EFlags from "ensign/Flags"
 
 import _List from "@/List"
-import { madlibJson } from "@/MadlibJson"
+import MadlibJson from "@/MadlibJson"
 import Pilcrow from "@/Pilcrow"
 import { rulesFromJson } from "@/Rules"
+import { INITIAL_STATE } from "@/State"
 
 
 
 PILCROW = IO.green("¶")
+
+export FLAGS = [
+  Ensign.flagBoolean("help", ["h"], "Print the help text for pilcrow"),
+  Ensign.flagString(
+    "madlib-json",
+    ["madlib", "M"],
+    "Set the path to `madlib.json`. Defaults to ./madlib.json",
+  ),
+  Ensign.flagString("input", ["i"], "The markdown file to read"),
+  Ensign.flagString("output", ["o"], "The markdown file to write"),
+  Ensign.flagBoolean("overwrite", ["w"], "Overwrite existing output file"),
+  Ensign.flagBoolean(
+    "auto",
+    ["A"],
+    "Overwrite existing input file. Implies `--overwrite`. Implies `--input` is the same as `--output`",
+  ),
+  Ensign.flagString("rulefile", ["r"], "The .pilcrowrc file to read from"),
+]
+
+// export validatedFlags = Ensign.validate(FLAGS)
 
 renderGoodPath = Fn.ifElse(
   List.isEmpty,
@@ -40,15 +69,72 @@ fillfull = (badMsg, wish) => Wish.fulfill(
   wish,
 )
 
+
+renderHelp = (useColor, flags) => (useColor ? Ensign.printLegendWithColor : Ensign.printLegend)(
+  flags,
+)
+
+// chain(
+//   (json) => pipe(
+//     map(Pilcrow.runner(json, rulesFromJson)),
+//     Wish.parallel,
+//   )(args),
+// )
+
+
+processFlagState :: PilcrowState
+  -> (PilcrowState -> Flag -> #[Boolean, PilcrowState])
+  -> List Flag
+  -> PilcrowState
+processFlagState = (state, process, flags) => {
+  walker = (done, aggState, toProcess) => if (done) {
+    aggState
+  } else {
+    where(toProcess) {
+      [] =>
+        aggState
+
+      [a, ...z] =>
+        do {
+          #[stop, upState] = process(aggState, a)
+          return walker(stop, upState, z)
+        }
+    }
+  }
+  return walker(false, state, flags)
+}
+
+
+parseArgs = pipe(
+  Ensign.parseFlags,
+  Ensign.validate(FLAGS),
+  Either.mapLeft(Ensign.printIssues),
+)
+
+captureTheFlag :: PilcrowState -> Flag -> #[Boolean, PilcrowState]
+captureTheFlag = (state, flag) => where(flag) {
+  EFlags.Flag(k, v) =>
+    if (k == "madlib-json") {
+      #[false, { ...state, madlibJson: Just(v) }]
+    } else {
+      #[false, state]
+    }
+
+  EFlags.FlagToggle(k, v) =>
+    if (k == "help" && v) {
+      #[true, { ...state, showHelp: true }]
+    } else {
+      #[false, state]
+    }
+}
+
 main = (args) => {
   pipe(
-    chain(
-      (json) => pipe(
-        _List.chop(1),
-        map(Pilcrow.runner(json, rulesFromJson)),
-        Wish.parallel,
-      )(args),
-    ),
-    fillfull("Error:"),
-  )(madlibJson)
+    List.drop(1),
+    parseArgs,
+    IO.pTrace("FLAGS!"),
+    map(processFlagState(INITIAL_STATE, captureTheFlag)),
+    // fillfull("Error:"),
+    IO.pTrace("OUT"),
+  )(args)
 }
