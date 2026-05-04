@@ -18,6 +18,7 @@ import EFlags from "ensign/Flags"
 import VFile from "spirit-gum/VFile"
 
 import _List from "@/List"
+import Log from "@/Log"
 import Party from "@/Log"
 import MadlibJson from "@/MadlibJson"
 import Pilcrow from "@/Pilcrow"
@@ -106,14 +107,14 @@ captureTheFlag = (state, flag) => where(flag) {
     }
 
   EFlags.FlagToggle(k, v) =>
-    if (k == "help" && v) {
+    if (k == "help") {
       // exclusive / short-circuiting
       #[true, { ...state, showHelp: v }]
-    } else if (k == "color" && !v) {
+    } else if (k == "color") {
       #[false, { ...state, color: v }]
-    } else if (k == "auto" && v) {
-      #[false, { ...state, auto: v }]
-    } else if (k == "force" && v) {
+    } else if (k == "auto") {
+      IO.pTrace("TOGGLING AUTO", #[false, { ...state, auto: v, overwrite: true }])
+    } else if (k == "force") {
       #[false, { ...state, overwrite: v }]
     } else {
       #[false, state]
@@ -178,6 +179,7 @@ applyMadlibJsonToState = ({ input, output, repo, overwrite, auto }, json) => whe
 ]) {
   #[Just(i), Just(o), Just(_repo)] =>
     do {
+      IO.pTrace("WELLD EF", #[i, o, _repo])
       writer = (overwrite ? readReadme : tryRead)(json, _repo)
       return if (auto) {
         if (i != o) {
@@ -191,17 +193,15 @@ applyMadlibJsonToState = ({ input, output, repo, overwrite, auto }, json) => whe
     }
 
   #[Just(i), Nothing, Just(_repo)] =>
-    (
-      if (auto) {
-        if (!overwrite) {
-          tryRead(json, _repo, i, i)
-        } else {
-          readReadme(json, _repo, i, i)
-        }
+    do {
+      writer = readReadme(json, _repo)
+      IO.pTrace("<><>", #[i, _repo, overwrite, auto])
+      return if (auto) {
+        writer(i, i)
       } else {
-        Wish.bad(DO_YOU_WANT_AUTO)
+        tryRead(json, _repo, i, i)
       }
-    )
+    }
 
   _ =>
     Wish.bad(NO_CAN_NO_CAN)
@@ -211,11 +211,14 @@ main = (args) => {
   pipe(
     /* cut the first argument, it's the name of this file */
     List.drop(1),
+    Log.log.cli("UHHH"),
     /* process the given arguments against the legend of the defined flags */
     parseArgs,
+    map(Log.log.cli("parsed arguments")),
     /* fold over our flags to build an initial state */
     map(processFlagState(INITIAL_STATE, captureTheFlag)),
     Either.fromRight(INITIAL_STATE),
+    IO.pTrace("STATE!"),
     /* do stuff based on that state */
     (state) => {
       { madlibJson, auto, overwrite, input, output, color, showHelp } = state
