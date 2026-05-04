@@ -1,5 +1,4 @@
 import type { MadlibDotJson } from "mad-at-json/Parse/MadlibJson"
-import type { WishCFile } from "spirit-gum/VFile"
 
 import type { PilcrowState } from "@/State"
 
@@ -32,14 +31,9 @@ runner :: MadlibDotJson
   -> String
   -> Wish String String
 export runner = (json, rulesFn, input, output) => pipe(
-  VFile.fromPath(
-    input,
-    pipe(
-      rulesFn,
-      Party.log.rule("Loaded..."),
-    )(json),
-  ),
+  VFile.fromPath(input, rulesFn(json)),
   Wish.mapRej((_) => "Unable to read from: " ++ input),
   map(Template.renderWithConverter(map(Line.render), (_, l, _) => String.unlines(l))),
+  map(Party.log.pilcrow("Rendered ...")),
   write(output),
 )(INITIAL_STATE)
