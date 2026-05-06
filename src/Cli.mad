@@ -131,8 +131,13 @@ captureTheFlag = (state, flag) => where(flag) {
     #[false, state]
 }
 
-ifFileEmpty = (o, goodPath) => pipe(
+extant = pipe(
   File.exists,
+  Wish.chainRej((_) => Wish.good(false)),
+)
+
+ifFileEmpty = (o, goodPath) => pipe(
+  extant,
   Wish.mapRej((_) => `${o} can't be inspected`),
   chain(
     (fail) => (
