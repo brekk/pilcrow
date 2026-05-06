@@ -1,10 +1,10 @@
 # ¶ pilcrow
 
 [![Madlib Project Badge](https://img.shields.io/badge/madlib-purple?logo=github&logoSize=auto)](//github.com/madlib-lang/madlib) <!-- $MADLIB.projectBadge -->
-[![pilcrow v0.1.2](https://img.shields.io/badge/v0.1.2-purple?label=version)](//github.com/brekk/pilcrow) <!-- $MADLIB.json.version -->
+[![pilcrow v0.1.3](https://img.shields.io/badge/v0.1.3-purple?label=version)](//github.com/brekk/pilcrow) <!-- $MADLIB.json.version -->
 
 
-badges and `spirit-gum` rules for readmes!
+badges and `spirit-gum` rules for READMEs!
 
 ---
 
@@ -48,7 +48,7 @@ This rule will create a badge that indicates the current version of the project 
 This rule requires a valid `madlib.json` be in the current path. Future versions will allow for this to be a configurable path.
 
 **Generated content**:
-[![pilcrow v0.1.2](https://img.shields.io/badge/v0.1.2-purple?label=version)](//github.com/brekk/pilcrow) <!-- $MADLIB.json.version -->
+[![pilcrow v0.1.3](https://img.shields.io/badge/v0.1.3-purple?label=version)](//github.com/brekk/pilcrow) <!-- $MADLIB.json.version -->
 
 ---
 

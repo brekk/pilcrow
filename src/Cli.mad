@@ -217,15 +217,16 @@ applyMadlibJsonToState = ({ input, output, repo, overwrite, auto }, json) => whe
 
 main = (args) => {
   pipe(
+    Log.env.cliVerbose("raw args"),
     /* cut the first argument, it's the name of this file */
     List.drop(1),
     /* process the given arguments against the legend of the defined flags */
     parseArgs,
-    map(Log.log.cli("parsed arguments")),
+    map(Log.env.cli("parsed arguments")),
     /* fold over our flags to build an initial state */
     map(processFlagState(INITIAL_STATE, captureTheFlag)),
     Either.fromRight(INITIAL_STATE),
-    Log.log.cli("initial state"),
+    Log.env.cli("initial state"),
     /* do stuff based on that state */
     (state) => {
       { madlibJson, auto, overwrite, input, output, color, showHelp } = state

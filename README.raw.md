@@ -4,7 +4,7 @@
 <!-- $MADLIB.json.version -->
 
 
-badges and `spirit-gum` rules for readmes!
+badges and `spirit-gum` rules for READMEs!
 
 ---
 

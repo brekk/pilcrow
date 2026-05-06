@@ -34,6 +34,6 @@ export runner = (json, rulesFn, input, output) => pipe(
   VFile.fromPath(input, rulesFn(json)),
   Wish.mapRej((_) => "Unable to read from: " ++ input),
   map(Template.renderWithConverter(map(Line.render), (_, l, _) => String.unlines(l))),
-  map(Party.log.pilcrow("Rendered ...")),
+  map(Party.env.pilcrow("Rendered ...")),
   write(output),
 )(INITIAL_STATE)

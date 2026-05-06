@@ -1,3 +1,7 @@
+/* ★★★ pilcrow@0.1.3 ★★★
+ * THIS FILE AUTOMATICALLY GENERATED FROM SOURCE: pilcrow.clowncar
+ */
+
 import Party from "PartyBus"
 
 
@@ -12,10 +16,10 @@ export tags = {
   ruleFiles: Party.tagWithScope("pilcrow", ["rule", "files"]),
   ruleVersion: Party.tagWithScope("pilcrow", ["rule", "version"]),
   cli: Party.tagWithScope("pilcrow", ["cli"]),
+  cliVerbose: Party.tagWithScope("pilcrow", ["cli", "verbose"]),
   transform: Party.tagWithScope("pilcrow", ["transform"]),
 }
-
-export log = {
+export env = {
   pilcrow: Party.env(tags.pilcrow),
   rule: Party.env(tags.rule),
   ruleBadgeAA: Party.env(tags.ruleBadgeAA),
@@ -25,18 +29,19 @@ export log = {
   ruleFiles: Party.env(tags.ruleFiles),
   ruleVersion: Party.env(tags.ruleVersion),
   cli: Party.env(tags.cli),
+  cliVerbose: Party.env(tags.cliVerbose),
   transform: Party.env(tags.transform),
 }
-
 export tapped = {
-  pilcrow: Party.tap(log.pilcrow),
-  rule: Party.tap(log.rule),
-  ruleBadgeAA: Party.tap(log.ruleBadgeAA),
-  ruleBadgeA: Party.tap(log.ruleBadgeA),
-  ruleBadge: Party.tap(log.ruleBadge),
-  ruleDeps: Party.tap(log.ruleDeps),
-  ruleFiles: Party.tap(log.ruleFiles),
-  ruleVersion: Party.tap(log.ruleVersion),
-  cli: Party.tap(log.cli),
-  transform: Party.tap(log.transform),
+  pilcrow: Party.tap(env.pilcrow),
+  rule: Party.tap(env.rule),
+  ruleBadgeAA: Party.tap(env.ruleBadgeAA),
+  ruleBadgeA: Party.tap(env.ruleBadgeA),
+  ruleBadge: Party.tap(env.ruleBadge),
+  ruleDeps: Party.tap(env.ruleDeps),
+  ruleFiles: Party.tap(env.ruleFiles),
+  ruleVersion: Party.tap(env.ruleVersion),
+  cli: Party.tap(env.cli),
+  cliVerbose: Party.tap(env.cliVerbose),
+  transform: Party.tap(env.transform),
 }

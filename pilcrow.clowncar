@@ -7,4 +7,5 @@ pilcrow
 - rule:files
 - rule:version
 - cli
+- cli:verbose
 - transform
