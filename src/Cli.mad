@@ -32,7 +32,6 @@ import { INITIAL_STATE } from "@/State"
 
 PILCROW = IO.green("¶")
 BAD_PILCROW = IO.red("¶")
-
 export FLAGS = [
   Declared.flagBoolean("help", ["h"], "This text you're reading!"),
   Declared.flagBoolean(
@@ -60,15 +59,10 @@ export FLAGS = [
     "The repo path for this project. Can be shorthand, like `brekk/ensign`",
   ),
 ]
-
-
-
-
 renderHelp = (useColor, flags) => {
   fn = (useColor ? EPrint.printLegendWithColor : EPrint.printLegend)
   return " pilcrow\na magic helper for madlib README files\n\n" ++ fn(flags)
 }
-
 processFlagState :: PilcrowState
   -> (PilcrowState -> Flag -> #[Boolean, PilcrowState])
   -> List Flag
@@ -90,14 +84,11 @@ processFlagState = (state, process, flags) => {
   }
   return walker(false, state, flags)
 }
-
-
 parseArgs = pipe(
   EFlags.parseFlags,
   Ensign.validate(FLAGS),
   Either.mapLeft(EPrint.printIssues),
 )
-
 captureTheFlag :: PilcrowState -> Flag -> #[Boolean, PilcrowState]
 captureTheFlag = (state, flag) => where(flag) {
   EFlags.Flag(k, v) =>
@@ -130,12 +121,10 @@ captureTheFlag = (state, flag) => where(flag) {
   _ =>
     #[false, state]
 }
-
 extant = pipe(
   File.exists,
   Wish.chainRej((_) => Wish.good(false)),
 )
-
 ifFileEmpty = (o, goodPath) => pipe(
   extant,
   Wish.mapRej((_) => `${o} can't be inspected`),
@@ -147,11 +136,9 @@ ifFileEmpty = (o, goodPath) => pipe(
     ),
   ),
 )(o)
-
 thrappend = (a, b, c) => a ++ b ++ c
 spaced = thrappend($, " ")
 lined = thrappend($, "\n")
-
 fillfull = Wish.fulfill(
   pipe(
     spaced(BAD_PILCROW),
@@ -164,29 +151,22 @@ fillfull = Wish.fulfill(
     Fn.always({}),
   ),
 )
-
 HELP_ME = "Try `pilcrow --help` for more info"
 helpful = lined($, HELP_ME)
-
 AUTO_BUT_CONFUSING = helpful(
   "Unable to run `--auto` with differing `--input` and `--output` specified. (Use `--force` if you know what you're doing, `--output` will be ignored. Or run `--auto` without specifying `--output`.)",
 )
-
 DO_YOU_WANT_AUTO = helpful(
   "Unable to safely process the given instructions. `--input` and `--repo` were provided but `--output` is required. (Using the `--auto` flag will set the `--output` flag to be the same as the `--input`.)",
 )
-
 NO_CAN_NO_CAN = helpful(
   "Unable to process the given instructions. `--input`, `--output`, and `--repo` are required.",
 )
-
 readReadme = (json, repo, i, o) => Pilcrow.runner(json, rulesFromJson(repo), i, o)
-
 tryRead = (json, repo, i, o) => pipe(
   readReadme(json, repo),
   ifFileEmpty(o),
 )(i)
-
 applyMadlibJsonToState :: PilcrowState -> MadlibDotJson -> Wish String String
 applyMadlibJsonToState = ({ input, output, repo, overwrite, auto }, json) => where(#[
   input,
@@ -219,10 +199,8 @@ applyMadlibJsonToState = ({ input, output, repo, overwrite, auto }, json) => whe
   _ =>
     Wish.bad(NO_CAN_NO_CAN)
 }
-
 main = (args) => {
   pipe(
-    Log.env.cliVerbose("raw args"),
     /* cut the first argument, it's the name of this file */
     List.drop(1),
     /* process the given arguments against the legend of the defined flags */
