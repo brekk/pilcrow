@@ -15,7 +15,6 @@ import { lineMatchTransformer } from "@/Transformer"
 
 
 export id = "pilcrow/markdown/magic-dependencies"
-
 depMatch :: Dependency -> String
 export depMatch = (d) => {
   link = pipe(
@@ -29,7 +28,6 @@ export depMatch = (d) => {
   // definitions allow for both, but current tooling clobbers one
   name = pipe(
     .name,
-    fromMaybe(""),
   )(d)
   desc = pipe(
     .description,
@@ -39,7 +37,6 @@ export depMatch = (d) => {
 
   return ` - [${ref}](//github.com/${link})`
 }
-
 generateDeps :: MadlibDotJson -> String
 export generateDeps = pipe(
   .dependencies,
@@ -47,10 +44,8 @@ export generateDeps = pipe(
   map(depMatch),
   String.unlines,
 )
-
 lineTransformer :: MadlibDotJson -> LineTransformerFunction a
 export lineTransformer = (json, _, _, _) => generateDeps(json)
-
 rule :: MadlibDotJson -> Rule a
 export rule = (json) => Rule.lineRule(
   false,
