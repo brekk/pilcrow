@@ -7,23 +7,21 @@ import { MADLIB_PROJECT, id, lineTransformer, rule, transformer } from "@/Rules/
 
 
 Study.report(Rule.id, "validate id", [#[rule, id]])
-
 transformerTest = Study.report(Study.caseN3(transformer))
-
 ID = "pilcrow:rule:" ++ id
-
 transformerTest(
   ID ++ " - common",
   [#[#[{}, -1, ""], MADLIB_PROJECT], #[#[{}, -1, "doesn't matter"], MADLIB_PROJECT]],
 )
-
 ONE = "<!-- $MADLIB.projectBadge -->"
 TWO = "[![Madlib Project Badge](https://img.shields.io/badge/madlib-purple?logo=github&logoSize=auto)](//github.com/madlib-lang/madlib) <!-- $MADLIB.projectBadge -->"
-
 Study.report(
   where(lineTransformer) {
     LineRawTransformer(fn) =>
       fn({}, -1)
+
+    _ =>
+      ???
   },
   "idempotency test",
   [#[ONE, #[{}, TWO]], #[TWO, #[{}, TWO]]],

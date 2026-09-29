@@ -1,0 +1,25 @@
+import Executive from "study/Cli"
+
+import Pilcrow from "@/Cli"
+
+
+
+presentation = Executive.powerpoint("./build/pilcrow")
+presentation(
+  "Should regenerate valid examples",
+  [
+    #[
+      [
+        "--no-color",
+        "-i",
+        "./test/sink.md",
+        "-o",
+        "./test/sink.golden.md",
+        "--repo",
+        "smink/smank",
+        "--force",
+      ],
+      Pilcrow.PILCROW ++ " Wrote to: ./test/sink.golden.md\n",
+    ],
+  ],
+)

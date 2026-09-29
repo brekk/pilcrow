@@ -30,8 +30,8 @@ import { INITIAL_STATE } from "@/State"
 
 
 
-PILCROW = IO.green("¶")
-BAD_PILCROW = IO.red("¶")
+export PILCROW = IO.green("¶")
+export BAD_PILCROW = IO.red("¶")
 export FLAGS = [
   Declared.flagBoolean("help", ["h"], "This text you're reading!"),
   Declared.flagBoolean(

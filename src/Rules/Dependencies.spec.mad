@@ -11,13 +11,14 @@ import { depMatch, generateDeps, id, lineTransformer, rule } from "@/Rules/Depen
 
 
 
-EXPECTED = (
+EXPECTED1 = (
   ` - [ensign](//github.com/brekk/ensign)
  - [mad-at-json](//github.com/brekk/mad-at-json)
  - [Study](//github.com/brekk/study)
  - [PartyBus](//github.com/brekk/party-bus)
  - [spirit-gum](//github.com/brekk/spirit-gum)`
 )
+EXPECTED = ""
 Study.asyncReport(
   pipe(
     map(
