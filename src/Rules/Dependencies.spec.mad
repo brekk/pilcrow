@@ -51,7 +51,7 @@ Study.report(
     #[
       {
         description: Nothing,
-        name: "test",
+        name: Just("test"),
         url: EXAMPLE_URL,
         sanitizedUrl: "",
         versionRange: AnyVersion,

@@ -28,6 +28,7 @@ export depMatch = (d) => {
   // definitions allow for both, but current tooling clobbers one
   name = pipe(
     .name,
+    fromMaybe(""),
   )(d)
   desc = pipe(
     .description,
