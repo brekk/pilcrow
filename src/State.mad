@@ -14,9 +14,8 @@ export alias PilcrowState = {
   overwrite :: Boolean,
   repo :: Maybe String,
   showHelp :: Boolean,
+  showVersion :: Boolean,
 }
-
-
 INITIAL_STATE :: PilcrowState
 export INITIAL_STATE = {
   // used in the cli arg parsing process
@@ -28,6 +27,7 @@ export INITIAL_STATE = {
   output: Nothing,
   overwrite: false,
   showHelp: false,
+  showVersion: false,
   // used in the spirit-gum process
   files: [],
 }

@@ -1,7 +1,7 @@
 BUILD_DIR := ./build
 EXEC := pilcrow
 
-$(BUILD_DIR)/$(EXEC):
+$(BUILD_DIR)/$(EXEC): src/Cli.mad
 	mkdir -p $(dir $@)
 	echo "compiling! - ¶"
 	madlib compile -i src/Cli.mad -t llvm -o $@

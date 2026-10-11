@@ -33,6 +33,7 @@ import { INITIAL_STATE } from "@/State"
 export PILCROW = IO.green("¶")
 export BAD_PILCROW = IO.red("¶")
 export FLAGS = [
+  Declared.flagBoolean("version", ["v"], "The version of pilcrow"),
   Declared.flagBoolean("help", ["h"], "This text you're reading!"),
   Declared.flagBoolean(
     "color",
@@ -105,7 +106,9 @@ captureTheFlag = (state, flag) => where(flag) {
     }
 
   EFlags.FlagToggle(k, v) =>
-    if (k == "help") {
+    if (k == "version") {
+      #[true, { ...state, showVersion: v }]
+    } else if (k == "help") {
       // exclusive / short-circuiting
       #[true, { ...state, showHelp: v }]
     } else if (k == "color") {
@@ -199,7 +202,8 @@ applyMadlibJsonToState = ({ input, output, repo, overwrite, auto }, json) => whe
   _ =>
     Wish.bad(NO_CAN_NO_CAN)
 }
-main = (args) => {
+renderVersion = (_, v) => show(v)
+main = (args) => do {
   pipe(
     /* cut the first argument, it's the name of this file */
     List.drop(1),
@@ -212,9 +216,13 @@ main = (args) => {
     Log.env.cli("initial state"),
     /* do stuff based on that state */
     (state) => {
-      { madlibJson, auto, overwrite, input, output, color, showHelp } = state
-      return if (showHelp) {
-        Wish.bad(renderHelp(color, FLAGS))
+      { madlibJson, auto, overwrite, showVersion, input, output, color, showHelp } = state
+      return if (showHelp || showVersion) {
+        if (showHelp) {
+          Wish.bad(renderHelp(color, FLAGS))
+        } else {
+          Wish.bad("pilcrow" ++ "@" ++ "0.2.0")
+        }
       } else do {
         sourceJsonPath = madlibJson ?? "./madlib.json"
         _output = auto && overwrite ? input : output
